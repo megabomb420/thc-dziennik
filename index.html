@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>THC Dziennik — kontrola i redukcja</title>
+<meta name="theme-color" content="#0d1f16">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">🌿 <span>THC</span> Dziennik</div>
+    <button id="settingsBtn" class="icon-btn" title="Ustawienia">⚙️</button>
+  </header>
+
+  <!-- KARTA STATUSU -->
+  <section class="card status">
+    <div class="status-grid">
+      <div class="stat">
+        <div class="stat-num" id="statToday">0</div>
+        <div class="stat-label">dziś sesji</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="statSince">–</div>
+        <div class="stat-label">od ostatniej</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="statGap">–</div>
+        <div class="stat-label">śr. odstęp</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="statGoal">–</div>
+        <div class="stat-label">limit/dzień</div>
+      </div>
+    </div>
+    <div class="goal-bar-wrap">
+      <div class="goal-bar"><div class="goal-fill" id="goalFill"></div></div>
+      <div class="goal-text" id="goalText">Ustaw limit dzienny w ustawieniach</div>
+    </div>
+  </section>
+
+  <!-- SZYBKI ZAPIS -->
+  <section class="card log-card">
+    <h2>Zapisz sesję</h2>
+    <div class="methods" id="methods"></div>
+    <div class="log-extras">
+      <input type="number" id="amountInput" min="0" step="0.05" placeholder="Ilość (opcjonalnie, g / mg)">
+      <input type="text" id="noteInput" maxlength="80" placeholder="Notatka (nastrój, powód…)">
+    </div>
+    <div class="log-actions">
+      <button class="btn primary" id="logNow">⚡ Zapisz teraz</button>
+      <button class="btn ghost" id="logCustom">🕐 Wybierz godzinę</button>
+    </div>
+    <input type="datetime-local" id="customTime" class="hidden">
+  </section>
+
+  <!-- WYKRES 7 DNI -->
+  <section class="card">
+    <h2>Ostatnie 7 dni</h2>
+    <div class="chart" id="chart"></div>
+  </section>
+
+  <!-- HISTORIA -->
+  <section class="card">
+    <div class="hist-head">
+      <h2>Historia</h2>
+      <button class="btn ghost small" id="exportBtn">⬇ Eksport JSON</button>
+    </div>
+    <div id="history" class="history"></div>
+  </section>
+
+  <footer>dane zapisują się lokalnie na tym urządzeniu · v1.0</footer>
+</div>
+
+<!-- MODAL USTAWIEŃ -->
+<div class="modal hidden" id="settingsModal">
+  <div class="modal-box">
+    <h2>⚙️ Ustawienia</h2>
+    <label>Dzienny limit sesji (0 = bez limitu)
+      <input type="number" id="goalInput" min="0" max="50">
+    </label>
+    <label>Nick (opcjonalnie)
+      <input type="text" id="nickInput" maxlength="30">
+    </label>
+    <div class="modal-actions">
+      <button class="btn primary" id="saveSettings">Zapisz</button>
+      <button class="btn ghost" id="closeSettings">Anuluj</button>
+    </div>
+    <button class="btn danger small" id="wipeBtn">🗑 Usuń wszystkie dane</button>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
