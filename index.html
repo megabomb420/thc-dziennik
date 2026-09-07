@@ -136,7 +136,27 @@
 <script src="app.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  let reloaded = false;
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // sprawdzaj aktualizacje co jakiś czas i przy powrocie do apki
+    setInterval(() => reg.update(), 60000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) reg.update();
+    });
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      sw && sw.addEventListener('statechange', () => {
+        if (sw.state === 'activated' && !reloaded) { reloaded = true; location.reload(); }
+      });
+    });
+  }).catch(()=>{});
+  // nowa wersja przejęła kontrolę → przeładuj na świeże pliki
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data && e.data.type === 'SW_UPDATED' && !reloaded) { reloaded = true; location.reload(); }
+  });
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!reloaded) { reloaded = true; location.reload(); }
+  });
 }
 </script>
 </body>
