@@ -137,13 +137,28 @@ function addEntry(ts) {
 }
 
 $('logNow').onclick = () => addEntry(Date.now());
-$('logCustom').onclick = () => {
+
+/* --- modal własnej godziny --- */
+function openTimeModal() {
   const c = $('customTime');
-  c.classList.remove('hidden');
   c.value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-  c.onchange = () => { if (c.value) { addEntry(new Date(c.value).getTime()); c.classList.add('hidden'); } };
-  c.focus();
+  $('timeModal').classList.remove('hidden');
+}
+function closeTimeModal() { $('timeModal').classList.add('hidden'); }
+
+$('logCustom').onclick = openTimeModal;
+$('cancelTime').onclick = closeTimeModal;
+$('timeModal').addEventListener('click', e => { if (e.target === $('timeModal')) closeTimeModal(); });
+$('confirmTime').onclick = () => {
+  const v = $('customTime').value;
+  if (!v) { toast('⚠️ Wybierz datę i godzinę'); return; }
+  addEntry(new Date(v).getTime());
+  closeTimeModal();
 };
+document.querySelectorAll('.quick-times .chip').forEach(chip => chip.onclick = () => {
+  addEntry(Date.now() - parseInt(chip.dataset.min) * 60000);
+  closeTimeModal();
+});
 
 /* --- eksport --- */
 $('exportBtn').onclick = () => {

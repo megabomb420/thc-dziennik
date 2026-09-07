@@ -13,6 +13,18 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!-- TŁO: ORBITY -->
+<div class="bg-scene" aria-hidden="true">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="orbit orbit-a"><div class="planet p1"></div></div>
+  <div class="orbit orbit-b"><div class="planet p2"></div></div>
+  <div class="orbit orbit-c"><div class="planet p3"></div></div>
+  <div class="stars"></div>
+</div>
+
 <div class="app">
 
   <header>
@@ -58,7 +70,6 @@
       <button class="btn primary" id="logNow">⚡ Zapisz teraz</button>
       <button class="btn ghost" id="logCustom">🕐 Wybierz godzinę</button>
     </div>
-    <input type="datetime-local" id="customTime" class="hidden">
   </section>
 
   <!-- WYKRES 7 DNI -->
@@ -94,6 +105,26 @@
       <button class="btn ghost" id="closeSettings">Anuluj</button>
     </div>
     <button class="btn danger small" id="wipeBtn">🗑 Usuń wszystkie dane</button>
+  </div>
+</div>
+
+<!-- MODAL WŁASNEJ GODZINY -->
+<div class="modal hidden" id="timeModal">
+  <div class="modal-box time-box">
+    <h2>🕐 Kiedy to było?</h2>
+    <div class="quick-times">
+      <button class="chip" data-min="15">15 min temu</button>
+      <button class="chip" data-min="30">30 min temu</button>
+      <button class="chip" data-min="60">1 h temu</button>
+      <button class="chip" data-min="120">2 h temu</button>
+    </div>
+    <label class="time-label">albo dokładna data i godzina
+      <input type="datetime-local" id="customTime">
+    </label>
+    <div class="modal-actions">
+      <button class="btn primary" id="confirmTime">Zapisz</button>
+      <button class="btn ghost" id="cancelTime">Anuluj</button>
+    </div>
   </div>
 </div>
 
