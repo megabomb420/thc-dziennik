@@ -1,5 +1,5 @@
-const CACHE = 'thc-dziennik-v2';
-const ASSETS = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest',
+const CACHE = 'thc-dziennik-v3';
+const ASSETS = ['./', './index.html', './style.css', './app.js', './fx.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {

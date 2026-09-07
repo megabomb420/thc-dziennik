@@ -57,12 +57,31 @@ body{
 @keyframes twinkle{from{opacity:.55}to{opacity:1}}
 
 @media (prefers-reduced-motion:reduce){
-  .orb,.orbit,.stars{animation:none}
+  .orb,.orbit,.stars,.aurora{animation:none}
 }
+.aurora{position:absolute;inset:-20%;opacity:.5;
+  background:
+    linear-gradient(115deg,transparent 30%,rgba(34,197,94,.14) 45%,transparent 60%),
+    linear-gradient(245deg,transparent 40%,rgba(16,185,129,.10) 55%,transparent 70%);
+  background-size:220% 220%;
+  animation:auroraMove 16s ease-in-out infinite alternate}
+@keyframes auroraMove{from{background-position:0% 0%,100% 100%}to{background-position:100% 60%,0% 30%}}
+
+#fx{position:fixed;inset:0;z-index:1;pointer-events:none}
+
+/* ripple */
+.btn,.chip,.method{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;background:rgba(134,239,172,.35);
+  transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1);opacity:0}}
 
 header{display:flex;justify-content:space-between;align-items:center;padding:8px 4px 18px}
-.logo{font-size:22px;font-weight:700;letter-spacing:.5px}
-.logo span{color:var(--accent)}
+.logo{font-size:22px;font-weight:700;letter-spacing:.5px;
+  text-shadow:0 0 22px rgba(74,222,128,.35)}
+.logo span{background:linear-gradient(90deg,#4ade80,#a7f3d0,#4ade80);
+  background-size:200% 100%;-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;animation:logoFlow 4s linear infinite}
+@keyframes logoFlow{to{background-position:200% 0}}
 .icon-btn{background:var(--card);border:none;font-size:20px;border-radius:12px;padding:8px 12px;cursor:pointer;color:var(--text)}
 
 .card{background:linear-gradient(160deg,rgba(18,34,25,.88),rgba(24,48,31,.82));
@@ -72,15 +91,26 @@ header{display:flex;justify-content:space-between;align-items:center;padding:8px
   box-shadow:0 6px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(134,239,172,.08);
   transition:transform .2s,box-shadow .2s}
 .card:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(0,0,0,.5),0 0 24px rgba(34,197,94,.08)}
+.card{will-change:transform}
+.card::after{content:'';position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;
+  background:radial-gradient(300px 200px at var(--mx,50%) var(--my,50%),rgba(134,239,172,.07),transparent 70%);
+  opacity:0;transition:opacity .25s}
+.card:hover::after{opacity:1}
+.card{position:relative;overflow:hidden}
 .card h2{font-size:15px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px}
 
 /* status */
 .status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
-.stat-num{font-size:24px;font-weight:800;color:var(--accent)}
+.stat-num{font-size:24px;font-weight:800;color:var(--accent);
+  text-shadow:0 0 16px rgba(74,222,128,.45)}
 .stat-label{font-size:11px;color:var(--muted);margin-top:2px}
 .goal-bar-wrap{margin-top:14px}
 .goal-bar{height:8px;background:#0c1a12;border-radius:99px;overflow:hidden}
-.goal-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px;transition:width .4s}
+.goal-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px;transition:width .4s;position:relative;overflow:hidden}
+.goal-fill::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);
+  background-size:250% 100%;animation:shimmer 1.8s linear infinite}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-60% 0}}
 .goal-fill.over{background:linear-gradient(90deg,#ef4444,#f87171)}
 .goal-text{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
 
@@ -92,7 +122,12 @@ header{display:flex;justify-content:space-between;align-items:center;padding:8px
 .method .m-name{font-size:12px;margin-top:6px;color:var(--muted)}
 .method:hover{border-color:rgba(74,222,128,.35)}
 .method.active{border-color:var(--accent);background:#15301f;transform:scale(1.03);
-  box-shadow:0 0 18px rgba(74,222,128,.22)}
+  box-shadow:0 0 18px rgba(74,222,128,.22);
+  animation:activePulse 2.4s ease-in-out infinite}
+@keyframes activePulse{
+  0%,100%{box-shadow:0 0 14px rgba(74,222,128,.18)}
+  50%{box-shadow:0 0 26px rgba(74,222,128,.45)}
+}
 .method.active .m-icon{transform:scale(1.15)}
 .method.active .m-name{color:var(--accent)}
 
@@ -104,7 +139,12 @@ header{display:flex;justify-content:space-between;align-items:center;padding:8px
 .log-actions{display:flex;gap:10px}
 .btn{border:none;border-radius:14px;padding:14px 18px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;color:var(--text)}
 .btn.primary{flex:1;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#06240f;
-  box-shadow:0 4px 18px rgba(34,197,94,.35)}
+  box-shadow:0 4px 18px rgba(34,197,94,.35);position:relative}
+.btn.primary::before{content:'';position:absolute;inset:0;border-radius:14px;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);
+  background-size:280% 100%;background-position:200% 0;pointer-events:none;
+  animation:btnSheen 3.2s ease-in-out infinite}
+@keyframes btnSheen{0%,55%{background-position:200% 0}85%,100%{background-position:-80% 0}}
 .btn.primary:hover{box-shadow:0 6px 26px rgba(74,222,128,.5);filter:brightness(1.06)}
 .btn.primary:active{transform:scale(.97)}
 .btn.ghost{background:#0e1d14;border:1px solid #1e3a29;transition:.15s}

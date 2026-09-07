@@ -23,7 +23,9 @@
   <div class="orbit orbit-b"><div class="planet p2"></div></div>
   <div class="orbit orbit-c"><div class="planet p3"></div></div>
   <div class="stars"></div>
+  <div class="aurora"></div>
 </div>
+<canvas id="fx" aria-hidden="true"></canvas>
 
 <div class="app">
 
@@ -130,6 +132,7 @@
 
 <div class="toast hidden" id="toast"></div>
 
+<script src="fx.js"></script>
 <script src="app.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

@@ -49,7 +49,8 @@ function renderStats() {
   const now = new Date();
   const sorted = [...entries].sort((a, b) => a.t - b.t);
   const todayCount = entries.filter(e => sameDay(new Date(e.t), now)).length;
-  $('statToday').textContent = todayCount;
+  if (window.fxCountTo) fxCountTo($('statToday'), todayCount);
+  else $('statToday').textContent = todayCount;
   $('statSince').textContent = sorted.length ? fmtSince(now - sorted[sorted.length - 1].t) : '–';
 
   if (sorted.length > 1) {
@@ -134,6 +135,9 @@ function addEntry(ts) {
   renderAll();
   const m = methodOf(selectedMethod);
   toast(`${m.icon} Zapisano: ${m.name}`);
+  // eksplozja cząsteczek z miejsca kliknięcia
+  const btn = $('logNow').getBoundingClientRect();
+  if (window.fxBurst) fxBurst(btn.left + btn.width / 2, btn.top + btn.height / 2);
 }
 
 $('logNow').onclick = () => addEntry(Date.now());
