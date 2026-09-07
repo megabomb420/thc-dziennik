@@ -1,4 +1,4 @@
-const CACHE = 'thc-dziennik-v3';
+const CACHE = 'thc-dziennik-v4';
 const ASSETS = ['./', './index.html', './style.css', './app.js', './fx.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png'];
 
