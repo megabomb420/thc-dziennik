@@ -1,5 +1,5 @@
-const CACHE = 'thc-dziennik-v4';
-const ASSETS = ['./', './index.html', './style.css', './app.js', './fx.js', './manifest.webmanifest',
+const CACHE = 'thc-dziennik-v5';
+const ASSETS = ['./', './index.html', './style.css', './app.js', './fx.js', './manifest.webmanifest', './fonts/chakra-400.woff2', './fonts/chakra-400ext.woff2', './fonts/chakra-600.woff2', './fonts/chakra-600ext.woff2', './fonts/chakra-700.woff2', './fonts/chakra-700ext.woff2',
   './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {

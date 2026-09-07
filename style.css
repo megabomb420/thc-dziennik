@@ -1,3 +1,23 @@
+/* ===== CZCIONKA: Chakra Petch (lokalnie, działa offline) ===== */
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:400;font-display:swap;
+  src:url('fonts/chakra-400.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F}
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:400;font-display:swap;
+  src:url('fonts/chakra-400ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+1E00-1EFF}
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:600;font-display:swap;
+  src:url('fonts/chakra-600.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F}
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:600;font-display:swap;
+  src:url('fonts/chakra-600ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+1E00-1EFF}
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:700;font-display:swap;
+  src:url('fonts/chakra-700.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F}
+@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:700;font-display:swap;
+  src:url('fonts/chakra-700ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+1E00-1EFF}
+
 :root{
   --bg:#0a140f;
   --card:#122219;
@@ -12,7 +32,9 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg);color-scheme:dark}
 body{
-  font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+  font-family:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  font-size:14px;
+  letter-spacing:.2px;
   background:var(--bg);
   color:var(--text);
   min-height:100vh;
@@ -77,7 +99,7 @@ body{
 @keyframes rip{to{transform:scale(1);opacity:0}}
 
 header{display:flex;justify-content:space-between;align-items:center;padding:8px 4px 18px}
-.logo{font-size:22px;font-weight:700;letter-spacing:.5px;
+.logo{font-size:19px;font-weight:700;letter-spacing:.5px;
   text-shadow:0 0 22px rgba(74,222,128,.35)}
 .logo span{background:linear-gradient(90deg,#4ade80,#a7f3d0,#4ade80);
   background-size:200% 100%;-webkit-background-clip:text;background-clip:text;
@@ -98,11 +120,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:8px
   opacity:0;transition:opacity .25s}
 .card:hover::after{opacity:1}
 .card{position:relative;overflow:hidden}
-.card h2{font-size:15px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px}
 
 /* status */
 .status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
-.stat-num{font-size:24px;font-weight:800;color:var(--accent);
+.stat-num{font-size:21px;font-weight:800;color:var(--accent);
   text-shadow:0 0 16px rgba(74,222,128,.45)}
 .stat-label{font-size:11px;color:var(--muted);margin-top:2px}
 .goal-bar-wrap{margin-top:14px}
@@ -119,7 +141,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:8px
 .methods{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
 .method{background:#0e1d14;border:2px solid transparent;border-radius:14px;
   padding:14px 6px;text-align:center;cursor:pointer;transition:.15s;color:var(--text)}
-.method .m-icon{font-size:26px;display:block;transition:transform .2s}
+.method .m-icon{font-size:24px;display:block;transition:transform .2s}
 .method .m-name{font-size:12px;margin-top:6px;color:var(--muted)}
 .method:hover{border-color:rgba(74,222,128,.35)}
 .method.active{border-color:var(--accent);background:#15301f;transform:scale(1.03);
@@ -138,7 +160,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:8px
 .log-extras input:focus{outline:none;border-color:var(--accent)}
 
 .log-actions{display:flex;gap:10px}
-.btn{border:none;border-radius:14px;padding:14px 18px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;color:var(--text)}
+.btn{border:none;border-radius:14px;padding:14px 18px;font-size:13px;letter-spacing:.6px;font-weight:700;cursor:pointer;transition:.15s;color:var(--text)}
 .btn.primary{flex:1;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#06240f;
   box-shadow:0 4px 18px rgba(34,197,94,.35);position:relative}
 .btn.primary::before{content:'';position:absolute;inset:0;border-radius:14px;
@@ -197,7 +219,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:8px
 
 /* modal godziny */
 .time-box .time-label{margin-bottom:12px}
-.time-box input[type="datetime-local"]{font-family:inherit;font-size:16px;text-align:center;letter-spacing:.5px}
+.time-box input[type="datetime-local"]{font-family:inherit;font-size:14px;text-align:center;letter-spacing:.5px}
 .quick-times{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
 .chip{background:#0e1d14;border:1px solid #1e3a29;border-radius:99px;padding:10px;
   color:var(--text);font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
@@ -216,3 +238,5 @@ footer{text-align:center;color:#4a6355;font-size:11px;margin-top:24px}
   .methods{grid-template-columns:repeat(2,1fr)}
   .log-extras{flex-direction:column}
 }
+
+input,button,textarea,select{font-family:inherit}
