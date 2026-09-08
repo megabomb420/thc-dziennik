@@ -29,6 +29,8 @@
 
 <div class="app">
 
+  <h1 class="sr-only" data-i18n="appTitle">THC Journal — control &amp; reduction</h1>
+
   <header>
     <div class="brand">
       <span class="logo-mark" data-icon="leaf"></span>
@@ -70,9 +72,11 @@
     <div class="methods" id="methods"></div>
     <div class="log-extras">
       <input type="number" id="amountInput" min="0" step="0.05"
-        data-i18n-placeholder="amountPh" placeholder="Amount (optional, g / mg)">
+        data-i18n-placeholder="amountPh" data-i18n-aria="amountAria"
+        placeholder="Amount (optional, g / mg)">
       <input type="text" id="noteInput" maxlength="80"
-        data-i18n-placeholder="notePh" placeholder="Note (mood, reason…)">
+        data-i18n-placeholder="notePh" data-i18n-aria="noteAria"
+        placeholder="Note (mood, reason…)">
     </div>
     <div class="log-actions">
       <button class="btn primary" id="logNow" data-icon="bolt"><span data-i18n="logNow">Log now</span></button>
@@ -95,13 +99,13 @@
     <div id="history" class="history"></div>
   </section>
 
-  <footer data-i18n="footer">data stays on this device only · v1.3.0</footer>
+  <footer data-i18n="footer">data stays on this device only · v1.3.2</footer>
 </div>
 
 <!-- MODAL USTAWIEŃ -->
-<div class="modal hidden" id="settingsModal">
+<div class="modal hidden" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
   <div class="modal-box">
-    <h2 class="with-ico"><span data-icon="sliders"></span><span data-i18n="settings">Settings</span></h2>
+    <h2 class="with-ico" id="settingsTitle"><span data-icon="sliders"></span><span data-i18n="settings">Settings</span></h2>
     <label><span data-i18n="goalLabel">Daily session limit (0 = no limit)</span>
       <input type="number" id="goalInput" min="0" max="50">
     </label>
@@ -123,9 +127,9 @@
 </div>
 
 <!-- MODAL WŁASNEJ GODZINY -->
-<div class="modal hidden" id="timeModal">
+<div class="modal hidden" id="timeModal" role="dialog" aria-modal="true" aria-labelledby="timeTitle">
   <div class="modal-box time-box">
-    <h2 class="with-ico"><span data-icon="clock"></span><span data-i18n="timeTitle">When was it?</span></h2>
+    <h2 class="with-ico" id="timeTitle"><span data-icon="clock"></span><span data-i18n="timeTitle">When was it?</span></h2>
     <div class="quick-times">
       <button class="chip" data-min="15" data-i18n="ago15">15 min ago</button>
       <button class="chip" data-min="30" data-i18n="ago30">30 min ago</button>
@@ -142,7 +146,7 @@
   </div>
 </div>
 
-<div class="toast hidden" id="toast"></div>
+<div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
 
 <script src="i18n.js"></script>
 <script src="icons.js"></script>

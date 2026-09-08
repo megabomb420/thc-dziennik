@@ -198,7 +198,11 @@
       c.el.style.scale = '0.96';
     }
 
-    function step() {
+    let lastT = 0;
+    function step(now) {
+      const dt = lastT ? Math.min(64, now - lastT) / 16.67 : 1;   // w klatkach 60 fps
+      lastT = now;
+      const k = 1 - Math.pow(0.82, dt);       // to samo wygładzenie, ale niezależne od FPS
       const H = innerHeight || 1;
       let moving = false;
       for (const c of items) {
@@ -209,16 +213,17 @@
         const tyT = (1 - e) * 34;
         const opT = 0.2 + e * 0.8;
         const scT = 0.96 + e * 0.04;
-        c.ty += (tyT - c.ty) * 0.18;            // wygładzenie -> "płynięcie"
-        c.op += (opT - c.op) * 0.18;
-        c.sc += (scT - c.sc) * 0.18;
+        c.ty += (tyT - c.ty) * k;
+        c.op += (opT - c.op) * k;
+        c.sc += (scT - c.sc) * k;
         if (Math.abs(tyT - c.ty) > 0.05 || Math.abs(opT - c.op) > 0.002 ||
             Math.abs(scT - c.sc) > 0.0005) moving = true;
         c.el.style.translate = '0 ' + c.ty.toFixed(2) + 'px';
         c.el.style.opacity = c.op.toFixed(3);
         c.el.style.scale = c.sc.toFixed(4);
       }
-      raf = moving ? requestAnimationFrame(step) : 0;
+      if (moving) raf = requestAnimationFrame(step);
+      else { raf = 0; lastT = 0; }
     }
 
     const kick = () => { if (!raf) raf = requestAnimationFrame(step); };

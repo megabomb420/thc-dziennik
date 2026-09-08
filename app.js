@@ -3,18 +3,60 @@ const METHODS = ['dab', 'vape', 'vapor', 'smoke', 'edible', 'oil'];
 const LS_ENTRIES = 'thc_entries_v1';
 const LS_SETTINGS = 'thc_settings_v1';
 
-let entries = JSON.parse(localStorage.getItem(LS_ENTRIES) || '[]');
-let settings = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{"goal":0,"nick":"","lang":"en"}');
-if (!settings.lang) settings.lang = 'en';
+/* ---------- bezpieczny storage (uszkodzone dane nie mogą zabić apki) ---------- */
+function readJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const v = JSON.parse(raw);
+    return v == null ? fallback : v;
+  } catch { return fallback; }
+}
+
+function loadEntries() {
+  const raw = readJSON(LS_ENTRIES, []);
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(e => e && typeof e === 'object' && typeof e.t === 'number' && isFinite(e.t))
+    .map(e => ({
+      id: typeof e.id === 'string' && e.id ? e.id : Math.random().toString(36).slice(2, 10),
+      t: e.t,
+      m: typeof e.m === 'string' ? e.m : 'vapor',
+      amount: e.amount == null ? null : String(e.amount).slice(0, 24),
+      note: e.note == null ? null : String(e.note).slice(0, 200),
+    }));
+}
+
+function loadSettings() {
+  const raw = readJSON(LS_SETTINGS, {});
+  const s = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const goal = parseInt(s.goal, 10);
+  return {
+    goal: isFinite(goal) ? Math.max(0, Math.min(50, goal)) : 0,
+    nick: typeof s.nick === 'string' ? s.nick.slice(0, 30) : '',
+    lang: s.lang === 'pl' ? 'pl' : 'en',
+  };
+}
+
+let entries = loadEntries();
+let settings = loadSettings();
 let selectedMethod = 'vapor';
 
 const $ = id => document.getElementById(id);
 const t = (k, v) => window.i18n.t(k, v);
 const methodName = id => t('method_' + id);
 
+/* dane użytkownika nigdy nie trafiają do HTML bez escapowania */
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 function save() {
-  localStorage.setItem(LS_ENTRIES, JSON.stringify(entries));
-  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+  try {
+    localStorage.setItem(LS_ENTRIES, JSON.stringify(entries));
+    localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+  } catch {
+    toast(t('toastStorageFull'), 'alert');
+  }
 }
 
 function fmtSince(ms) {
@@ -107,13 +149,13 @@ function renderHistory() {
     const d = new Date(e.t);
     const when = d.toLocaleDateString(loc, { day: 'numeric', month: 'short' }) + ' ' +
                  d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' });
-    const extra = [e.amount ? e.amount : '', e.note || ''].filter(Boolean).join(' · ');
+    const extra = [e.amount ? esc(e.amount) : '', e.note ? esc(e.note) : ''].filter(Boolean).join(' · ');
     return `<div class="entry m-${id}">
       <span class="e-icon">${svgIcon(id)}</span>
       <div class="e-main"><div class="e-method">${methodName(id)}</div>
       ${extra ? `<div class="e-note">${extra}</div>` : ''}</div>
       <div class="e-time">${when}</div>
-      <button class="e-del" data-id="${e.id}" title="${t('titleDelete')}" aria-label="${t('ariaDelete')}">${svgIcon('close')}</button>
+      <button class="e-del" data-id="${esc(e.id)}" title="${t('titleDelete')}" aria-label="${t('ariaDelete')}">${svgIcon('close')}</button>
     </div>`;
   }).join('');
   el.querySelectorAll('.e-del').forEach(b => b.onclick = () => {
@@ -130,8 +172,8 @@ function addEntry(ts) {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     t: ts,
     m: selectedMethod,
-    amount: $('amountInput').value ? $('amountInput').value : null,
-    note: $('noteInput').value.trim() || null,
+    amount: $('amountInput').value ? $('amountInput').value.slice(0, 24) : null,
+    note: $('noteInput').value.trim().slice(0, 200) || null,
   });
   save();
   $('amountInput').value = ''; $('noteInput').value = '';
@@ -202,8 +244,8 @@ $('langInput').onchange = e => {
 $('saveSettings').onclick = () => {
   const code = $('langInput').value;
   settings.lang = window.i18n.langs.some(l => l.code === code) ? code : 'en';
-  settings.goal = Math.max(0, parseInt($('goalInput').value) || 0);
-  settings.nick = $('nickInput').value.trim();
+  settings.goal = Math.max(0, Math.min(50, parseInt($('goalInput').value, 10) || 0));
+  settings.nick = $('nickInput').value.trim().slice(0, 30);
   save(); renderAll();
   langAtOpen = settings.lang;
   $('settingsModal').classList.add('hidden');
@@ -221,7 +263,7 @@ $('wipeBtn').onclick = () => {
 let toastTimer;
 function toast(msg, ico) {
   const el = $('toast');
-  el.innerHTML = (ico ? svgIcon(ico) : '') + `<span>${msg}</span>`;
+  el.innerHTML = (ico ? svgIcon(ico) : '') + `<span>${esc(msg)}</span>`;
   el.classList.remove('hidden');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
