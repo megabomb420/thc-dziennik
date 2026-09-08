@@ -30,8 +30,11 @@
 <div class="app">
 
   <header>
-    <div class="logo">🌿 <span>THC</span> Dziennik</div>
-    <button id="settingsBtn" class="icon-btn" title="Ustawienia">⚙️</button>
+    <div class="brand">
+      <span class="logo-mark" data-icon="leaf"></span>
+      <div class="logo"><span>THC</span> Dziennik</div>
+    </div>
+    <button id="settingsBtn" class="icon-btn" title="Ustawienia" aria-label="Ustawienia" data-icon="sliders"></button>
   </header>
 
   <!-- KARTA STATUSU -->
@@ -69,8 +72,8 @@
       <input type="text" id="noteInput" maxlength="80" placeholder="Notatka (nastrój, powód…)">
     </div>
     <div class="log-actions">
-      <button class="btn primary" id="logNow">⚡ Zapisz teraz</button>
-      <button class="btn ghost" id="logCustom">🕐 Wybierz godzinę</button>
+      <button class="btn primary" id="logNow" data-icon="bolt">Zapisz teraz</button>
+      <button class="btn ghost" id="logCustom" data-icon="clock">Wybierz godzinę</button>
     </div>
   </section>
 
@@ -84,18 +87,18 @@
   <section class="card">
     <div class="hist-head">
       <h2>Historia</h2>
-      <button class="btn ghost small" id="exportBtn">⬇ Eksport JSON</button>
+      <button class="btn ghost small" id="exportBtn" data-icon="download">Eksport JSON</button>
     </div>
     <div id="history" class="history"></div>
   </section>
 
-  <footer>dane zapisują się lokalnie na tym urządzeniu · v1.0</footer>
+  <footer>dane zapisują się lokalnie na tym urządzeniu · v1.1</footer>
 </div>
 
 <!-- MODAL USTAWIEŃ -->
 <div class="modal hidden" id="settingsModal">
   <div class="modal-box">
-    <h2>⚙️ Ustawienia</h2>
+    <h2 class="with-ico"><span data-icon="sliders"></span>Ustawienia</h2>
     <label>Dzienny limit sesji (0 = bez limitu)
       <input type="number" id="goalInput" min="0" max="50">
     </label>
@@ -106,14 +109,14 @@
       <button class="btn primary" id="saveSettings">Zapisz</button>
       <button class="btn ghost" id="closeSettings">Anuluj</button>
     </div>
-    <button class="btn danger small" id="wipeBtn">🗑 Usuń wszystkie dane</button>
+    <button class="btn danger small" id="wipeBtn" data-icon="trash">Usuń wszystkie dane</button>
   </div>
 </div>
 
 <!-- MODAL WŁASNEJ GODZINY -->
 <div class="modal hidden" id="timeModal">
   <div class="modal-box time-box">
-    <h2>🕐 Kiedy to było?</h2>
+    <h2 class="with-ico"><span data-icon="clock"></span>Kiedy to było?</h2>
     <div class="quick-times">
       <button class="chip" data-min="15">15 min temu</button>
       <button class="chip" data-min="30">30 min temu</button>
@@ -132,6 +135,7 @@
 
 <div class="toast hidden" id="toast"></div>
 
+<script src="icons.js"></script>
 <script src="fx.js"></script>
 <script src="app.js"></script>
 <script>

@@ -1,10 +1,10 @@
 const METHODS = [
-  { id:'dab',    icon:'💧', name:'Dab' },
-  { id:'vape',   icon:'💨', name:'Vape' },
-  { id:'vapor',  icon:'🌬️', name:'Waporyzator' },
-  { id:'smoke',  icon:'🚬', name:'Palenie' },
-  { id:'edible', icon:'🍪', name:'Edibles' },
-  { id:'oil',    icon:'🧴', name:'Olejek/Tincture' },
+  { id:'dab',    name:'Dab' },
+  { id:'vape',   name:'Vape' },
+  { id:'vapor',  name:'Waporyzator' },
+  { id:'smoke',  name:'Palenie' },
+  { id:'edible', name:'Edibles' },
+  { id:'oil',    name:'Olejek/Tincture' },
 ];
 
 const LS_ENTRIES = 'thc_entries_v1';
@@ -37,8 +37,9 @@ function sameDay(a, b) {
 /* --- metody --- */
 function renderMethods() {
   $('methods').innerHTML = METHODS.map(m =>
-    `<button class="method ${m.id === selectedMethod ? 'active' : ''}" data-id="${m.id}">
-       <span class="m-icon">${m.icon}</span><span class="m-name">${m.name}</span>
+    `<button class="method m-${m.id} ${m.id === selectedMethod ? 'active' : ''}" data-id="${m.id}"
+       aria-pressed="${m.id === selectedMethod}">
+       <span class="m-icon">${svgIcon(m.id)}</span><span class="m-name">${m.name}</span>
      </button>`).join('');
   document.querySelectorAll('.method').forEach(b =>
     b.onclick = () => { selectedMethod = b.dataset.id; renderMethods(); });
@@ -64,13 +65,14 @@ function renderStats() {
   if (settings.goal > 0) {
     const pct = Math.min(100, todayCount / settings.goal * 100);
     fill.style.width = pct + '%';
-    fill.classList.toggle('over', todayCount > settings.goal);
-    txt.textContent = todayCount > settings.goal
-      ? `⚠️ Limit przekroczony: ${todayCount}/${settings.goal}`
-      : `Dzisiejszy limit: ${todayCount}/${settings.goal}`;
+    const over = todayCount > settings.goal;
+    fill.classList.toggle('over', over);
+    txt.classList.toggle('over', over);
+    txt.innerHTML = (over ? svgIcon('alert') : '') +
+      `<span>${over ? 'Limit przekroczony' : 'Dzisiejszy limit'}: ${todayCount}/${settings.goal}</span>`;
   } else {
     fill.style.width = '0';
-    txt.textContent = 'Ustaw limit dzienny w ustawieniach ⚙️';
+    txt.innerHTML = svgIcon('sliders') + '<span>Ustaw limit dzienny w ustawieniach</span>';
   }
 }
 
@@ -98,19 +100,25 @@ function methodOf(id) { return METHODS.find(m => m.id === id) || METHODS[0]; }
 function renderHistory() {
   const el = $('history');
   const sorted = [...entries].sort((a, b) => b.t - a.t).slice(0, 100);
-  if (!sorted.length) { el.innerHTML = '<div class="empty">Brak wpisów — zapisz pierwszą sesję 🌿</div>'; return; }
+  if (!sorted.length) {
+    el.innerHTML = `<div class="empty">
+      <span class="empty-art">${svgIcon('leaf')}</span>
+      <div class="empty-txt">Brak wpisów — zapisz pierwszą sesję, żeby zacząć śledzić swój rytm</div>
+    </div>`;
+    return;
+  }
   el.innerHTML = sorted.map(e => {
     const m = methodOf(e.m);
     const d = new Date(e.t);
     const when = d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }) + ' ' +
                  d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
     const extra = [e.amount ? e.amount : '', e.note || ''].filter(Boolean).join(' · ');
-    return `<div class="entry">
-      <span class="e-icon">${m.icon}</span>
+    return `<div class="entry m-${m.id}">
+      <span class="e-icon">${svgIcon(m.id)}</span>
       <div class="e-main"><div class="e-method">${m.name}</div>
       ${extra ? `<div class="e-note">${extra}</div>` : ''}</div>
       <div class="e-time">${when}</div>
-      <button class="e-del" data-id="${e.id}" title="Usuń">✕</button>
+      <button class="e-del" data-id="${e.id}" title="Usuń" aria-label="Usuń wpis">${svgIcon('close')}</button>
     </div>`;
   }).join('');
   el.querySelectorAll('.e-del').forEach(b => b.onclick = () => {
@@ -134,7 +142,7 @@ function addEntry(ts) {
   $('amountInput').value = ''; $('noteInput').value = '';
   renderAll();
   const m = methodOf(selectedMethod);
-  toast(`${m.icon} Zapisano: ${m.name}`);
+  toast(`Zapisano: ${m.name}`, m.id);
   // eksplozja cząsteczek z miejsca kliknięcia
   const btn = $('logNow').getBoundingClientRect();
   if (window.fxBurst) fxBurst(btn.left + btn.width / 2, btn.top + btn.height / 2);
@@ -155,7 +163,7 @@ $('cancelTime').onclick = closeTimeModal;
 $('timeModal').addEventListener('click', e => { if (e.target === $('timeModal')) closeTimeModal(); });
 $('confirmTime').onclick = () => {
   const v = $('customTime').value;
-  if (!v) { toast('⚠️ Wybierz datę i godzinę'); return; }
+  if (!v) { toast('Wybierz datę i godzinę', 'alert'); return; }
   addEntry(new Date(v).getTime());
   closeTimeModal();
 };
@@ -185,21 +193,22 @@ $('saveSettings').onclick = () => {
   settings.nick = $('nickInput').value.trim();
   save(); renderAll();
   $('settingsModal').classList.add('hidden');
-  toast('✅ Zapisano ustawienia');
+  toast('Zapisano ustawienia', 'check');
 };
 $('wipeBtn').onclick = () => {
   if (confirm('Na pewno usunąć WSZYSTKIE wpisy? Tego nie da się cofnąć.')) {
     entries = []; save(); renderAll();
     $('settingsModal').classList.add('hidden');
-    toast('🗑 Dane usunięte');
+    toast('Dane usunięte', 'trash');
   }
 };
 
 /* --- toast --- */
 let toastTimer;
-function toast(msg) {
+function toast(msg, ico) {
   const t = $('toast');
-  t.textContent = msg; t.classList.remove('hidden');
+  t.innerHTML = (ico ? svgIcon(ico) : '') + `<span>${msg}</span>`;
+  t.classList.remove('hidden');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.add('hidden'), 2200);
 }
