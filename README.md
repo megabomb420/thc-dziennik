@@ -8,13 +8,14 @@ Bez backendu, bez konta, bez zależności w runtime: statyczne pliki, a dane zos
 ## Funkcje
 
 - Zapis sesji jednym kliknięciem (albo z własną godziną)
-- Metody: Dab · Vape · Waporyzator · Palenie · Edibles · Olejek/Tincture — każda z własną grafiką i kolorem
+- Metody: Dab · Vape · Dry herb vape · Palenie · Edibles · Olejek/Tincture — każda z własną grafiką i kolorem
 - Opcjonalna ilość (g/mg) i notatka (nastrój, powód)
 - Statystyki: sesje dziś, czas od ostatniej, średni odstęp, wykres 7 dni
 - Dzienny limit sesji z paskiem postępu (tryb redukcji)
 - Eksport danych do JSON
 - Działa offline, instalowalna jako PWA, dane tylko lokalnie (localStorage)
 - Zachowuje się jak apka, nie strona: brak zoomu (pinch i double-tap), brak gumowania przy scrollu, karty płynnie wjeżdżają podczas przewijania
+- **Dwa języki:** angielski domyślnie, polski do wyboru w ustawieniach (przełącza się od razu, razem z datami i nazwami dni)
 
 ## Grafika
 
@@ -24,12 +25,17 @@ Każda metoda ma własny kolor akcentu (bursztyn, cyjan, zieleń, pomarańcz, r�
 
 Znakiem aplikacji jest **liść marihuany** (7 listków). Z tej samej geometrii powstają ikony PWA w `icons/` (192 / 512 / maskable).
 
+## Języki
+
+Cały tekst interfejsu żyje w `i18n.js` (`STRINGS.en`, `STRINGS.pl`) i jest pobierany przez `t('klucz')`. Statyczny HTML ma atrybuty `data-i18n` / `data-i18n-placeholder` / `data-i18n-title` / `data-i18n-aria`, a dynamiczne części (metody, statystyki, wykres, historia) przerysowuje `window.onLangChange`. Wybór języka zapisuje się w `settings.lang`; daty i skróty dni idą za lokalizacją (`en-GB` / `pl-PL`).
+
 ## Struktura
 
 | Plik | Rola |
 |---|---|
 | `index.html` | szkielet widoku, modale, rejestracja service workera |
 | `style.css` | motyw, tło (orbity, aurora, gwiazdy), style kart i ikon |
+| `i18n.js` | słowniki EN/PL, `t()`, `setLang()`, lokalizacja dat i dni |
 | `icons.js` | zestaw ikon SVG + `svgIcon()` + hydratacja `data-icon` |
 | `app.js` | logika: wpisy, statystyki, wykres, historia, ustawienia |
 | `fx.js` | efekty na canvasie: dym, świetliki, eksplozje, ripple, tilt |

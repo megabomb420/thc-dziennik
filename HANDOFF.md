@@ -7,6 +7,8 @@ Live app: https://megabomb420.github.io/thc-dziennik/
 
 THC Dziennik is a local-first PWA for logging THC session times, built for self-control and reduction. It is deliberately dependency-free at runtime: five hand-written files (`index.html`, `style.css`, `icons.js`, `app.js`, `fx.js`) plus `sw.js` for offline. Vite is a dev server only — there is no build step and no bundler output. All state lives in `localStorage` (`thc_entries_v1`, `thc_settings_v1`); there is no account, no telemetry, no remote font and no third-party script.
 
+The interface is bilingual: English is the default and Polish is selectable in Settings. All copy lives in `i18n.js` (`STRINGS.en` / `STRINGS.pl`) and is read through `t(key, vars)`; static markup carries `data-i18n`, `data-i18n-placeholder`, `data-i18n-title` or `data-i18n-aria` and is filled by `apply()`. Dates, times and weekday labels follow the active locale (`en-GB` / `pl-PL`), and `app.js` re-renders the dynamic parts from `window.onLangChange`. The choice is stored as `settings.lang`; anything unknown falls back to English.
+
 The six methods are fixed: `dab`, `vape`, `vapor`, `smoke`, `edible`, `oil`. Their ids are storage keys written into every entry — rename one and old entries silently lose their method, so they must never change. Labels may change freely.
 
 The daily session limit (`settings.goal`, 0 = unlimited) is the reduction lever. It drives the progress bar, the over-limit state and the "dziś sesji / limit dziennie" stats. Statistics and the 7-day chart count local calendar days (`sameDay`), never UTC.
@@ -22,6 +24,16 @@ Motion is progressive, not required: `prefers-reduced-motion` disables the canva
 The app is meant to feel native rather than like a web page. Pinch zoom and double-tap zoom are blocked at three levels: the viewport meta (`user-scalable=no, maximum-scale=1`), `touch-action: pan-x pan-y` on the root, and JS guards in `fx.js` for iOS `gesture*` events, multi-finger `touchstart`, and a second tap inside 320 ms on non-control surfaces. `overscroll-behavior-y: none` removes rubber-band and pull-to-refresh. Text fields stay at 16px on touch devices, because that is the only dependable way to stop iOS focus zoom; on fine-pointer devices they are 14px, and placeholders are 14px everywhere.
 
 Cards are animated from JS, never CSS, so a JS failure leaves the page readable. `fx.js` writes only the independent `translate`, `scale` and `opacity` properties; the pointer tilt keeps using `transform`, so the two never overwrite each other. The loop is rAF-driven with per-frame lerp smoothing, stops when settled, and restarts on scroll, resize, visibility change and any body resize.
+
+## Release 1.3.0 — completed scope (2026-09-08)
+
+- **English is now the default language; Polish moved into Settings.** A new `i18n.js` holds both string tables and exposes `i18n.t(key, vars)`, `i18n.setLang(code)`, `i18n.locale()` and `i18n.weekdays()`. Static copy in `index.html` is marked with `data-i18n` / `data-i18n-placeholder` / `data-i18n-title` / `data-i18n-aria` and applied on load and on every change; `document.documentElement.lang` and `document.title` follow the choice. `app.js` reads every user-facing string through `t()` and re-renders methods, stats, chart and history from `window.onLangChange`, so switching is instant with no reload. Any unknown or missing `lang` falls back to English.
+- Dates, times and the chart's weekday initials are locale-driven: `en-GB` (`8 Sept 20:20`, `Su Mo Tu…`) versus `pl-PL` (`8 wrz 20:20`, `Nd Pn Wt…`).
+- The settings modal gains a Language `<select>` (English / Polski). Changing it applies and persists immediately as `settings.lang`, independent of Save/Cancel — those still handle the limit and nickname.
+- Method labels are translated; the dry-herb device is labelled **"Dry herb vape"** in both languages, keeping it distinct from the separate "Vape" (cart/pod) method.
+- `manifest.webmanifest` name, description and `lang` switched to English, since the default install is English. `package.json` is 1.3.0, the footer is `v1.3.0`, and `sw.js` `CACHE` moved `v9` → `v10` with `./i18n.js` added to `ASSETS`. Export filenames changed from `thc-dziennik-<date>.json` to `thc-journal-<date>.json`.
+
+Validation: `node --check` on all four JS files. Headless Chrome at 390×844 with a profile carrying no stored `lang`: English everywhere — html lang `en`, title `THC Journal — control & reduction`, "Log now", "sessions today", "Dry herb vape", weekdays `We,Th,Fr…`, entry stamp `8 Sept 20:20`, footer v1.3.0. Selecting Polski in Settings switched every string without a reload — html lang `pl`, "Zapisz teraz", "dziś sesji", "Olejek/Tincture", weekdays `Śr,Cz,Pt…`, stamp `8 wrz 20:20` — and the choice survived a reload; switching back restored the English copy and date format. Icons survived every text swap, because translated strings sit in dedicated spans and never on the `data-icon` element. No console errors.
 
 ## Release 1.2.1 — completed scope (2026-09-08)
 

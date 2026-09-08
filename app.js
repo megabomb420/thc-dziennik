@@ -1,20 +1,16 @@
-const METHODS = [
-  { id:'dab',    name:'Dab' },
-  { id:'vape',   name:'Vape' },
-  { id:'vapor',  name:'Waporyzator' },
-  { id:'smoke',  name:'Palenie' },
-  { id:'edible', name:'Edibles' },
-  { id:'oil',    name:'Olejek/Tincture' },
-];
+const METHODS = ['dab', 'vape', 'vapor', 'smoke', 'edible', 'oil'];
 
 const LS_ENTRIES = 'thc_entries_v1';
 const LS_SETTINGS = 'thc_settings_v1';
 
 let entries = JSON.parse(localStorage.getItem(LS_ENTRIES) || '[]');
-let settings = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{"goal":0,"nick":""}');
+let settings = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{"goal":0,"nick":"","lang":"en"}');
+if (!settings.lang) settings.lang = 'en';
 let selectedMethod = 'vapor';
 
 const $ = id => document.getElementById(id);
+const t = (k, v) => window.i18n.t(k, v);
+const methodName = id => t('method_' + id);
 
 function save() {
   localStorage.setItem(LS_ENTRIES, JSON.stringify(entries));
@@ -36,10 +32,10 @@ function sameDay(a, b) {
 
 /* --- metody --- */
 function renderMethods() {
-  $('methods').innerHTML = METHODS.map(m =>
-    `<button class="method m-${m.id} ${m.id === selectedMethod ? 'active' : ''}" data-id="${m.id}"
-       aria-pressed="${m.id === selectedMethod}">
-       <span class="m-icon">${svgIcon(m.id)}</span><span class="m-name">${m.name}</span>
+  $('methods').innerHTML = METHODS.map(id =>
+    `<button class="method m-${id} ${id === selectedMethod ? 'active' : ''}" data-id="${id}"
+       aria-pressed="${id === selectedMethod}">
+       <span class="m-icon">${svgIcon(id)}</span><span class="m-name">${methodName(id)}</span>
      </button>`).join('');
   document.querySelectorAll('.method').forEach(b =>
     b.onclick = () => { selectedMethod = b.dataset.id; renderMethods(); });
@@ -69,10 +65,10 @@ function renderStats() {
     fill.classList.toggle('over', over);
     txt.classList.toggle('over', over);
     txt.innerHTML = (over ? svgIcon('alert') : '') +
-      `<span>${over ? 'Limit przekroczony' : 'Dzisiejszy limit'}: ${todayCount}/${settings.goal}</span>`;
+      `<span>${t(over ? 'goalOver' : 'goalToday', { a: todayCount, b: settings.goal })}</span>`;
   } else {
     fill.style.width = '0';
-    txt.innerHTML = svgIcon('sliders') + '<span>Ustaw limit dzienny w ustawieniach</span>';
+    txt.innerHTML = svgIcon('sliders') + `<span>${t('goalUnset')}</span>`;
   }
 }
 
@@ -85,7 +81,7 @@ function renderChart() {
   }
   const counts = days.map(d => entries.filter(e => sameDay(new Date(e.t), d)).length);
   const max = Math.max(1, ...counts);
-  const names = ['Nd','Pn','Wt','Śr','Cz','Pt','So'];
+  const names = window.i18n.weekdays();
   $('chart').innerHTML = days.map((d, i) => `
     <div class="bar-col">
       <span class="bar-count">${counts[i] || ''}</span>
@@ -95,30 +91,29 @@ function renderChart() {
 }
 
 /* --- historia --- */
-function methodOf(id) { return METHODS.find(m => m.id === id) || METHODS[0]; }
-
 function renderHistory() {
   const el = $('history');
   const sorted = [...entries].sort((a, b) => b.t - a.t).slice(0, 100);
   if (!sorted.length) {
     el.innerHTML = `<div class="empty">
       <span class="empty-art">${svgIcon('leaf')}</span>
-      <div class="empty-txt">Brak wpisów — zapisz pierwszą sesję, żeby zacząć śledzić swój rytm</div>
+      <div class="empty-txt">${t('empty')}</div>
     </div>`;
     return;
   }
+  const loc = window.i18n.locale();
   el.innerHTML = sorted.map(e => {
-    const m = methodOf(e.m);
+    const id = METHODS.includes(e.m) ? e.m : METHODS[0];
     const d = new Date(e.t);
-    const when = d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }) + ' ' +
-                 d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+    const when = d.toLocaleDateString(loc, { day: 'numeric', month: 'short' }) + ' ' +
+                 d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' });
     const extra = [e.amount ? e.amount : '', e.note || ''].filter(Boolean).join(' · ');
-    return `<div class="entry m-${m.id}">
-      <span class="e-icon">${svgIcon(m.id)}</span>
-      <div class="e-main"><div class="e-method">${m.name}</div>
+    return `<div class="entry m-${id}">
+      <span class="e-icon">${svgIcon(id)}</span>
+      <div class="e-main"><div class="e-method">${methodName(id)}</div>
       ${extra ? `<div class="e-note">${extra}</div>` : ''}</div>
       <div class="e-time">${when}</div>
-      <button class="e-del" data-id="${e.id}" title="Usuń" aria-label="Usuń wpis">${svgIcon('close')}</button>
+      <button class="e-del" data-id="${e.id}" title="${t('titleDelete')}" aria-label="${t('ariaDelete')}">${svgIcon('close')}</button>
     </div>`;
   }).join('');
   el.querySelectorAll('.e-del').forEach(b => b.onclick = () => {
@@ -141,8 +136,7 @@ function addEntry(ts) {
   save();
   $('amountInput').value = ''; $('noteInput').value = '';
   renderAll();
-  const m = methodOf(selectedMethod);
-  toast(`Zapisano: ${m.name}`, m.id);
+  toast(t('toastSaved', { m: methodName(selectedMethod) }), selectedMethod);
   // eksplozja cząsteczek z miejsca kliknięcia
   const btn = $('logNow').getBoundingClientRect();
   if (window.fxBurst) fxBurst(btn.left + btn.width / 2, btn.top + btn.height / 2);
@@ -163,7 +157,7 @@ $('cancelTime').onclick = closeTimeModal;
 $('timeModal').addEventListener('click', e => { if (e.target === $('timeModal')) closeTimeModal(); });
 $('confirmTime').onclick = () => {
   const v = $('customTime').value;
-  if (!v) { toast('Wybierz datę i godzinę', 'alert'); return; }
+  if (!v) { toast(t('toastPickTime'), 'alert'); return; }
   addEntry(new Date(v).getTime());
   closeTimeModal();
 };
@@ -177,7 +171,7 @@ $('exportBtn').onclick = () => {
   const blob = new Blob([JSON.stringify({ settings, entries }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'thc-dziennik-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.download = 'thc-journal-' + new Date().toISOString().slice(0, 10) + '.json';
   a.click();
 };
 
@@ -185,35 +179,42 @@ $('exportBtn').onclick = () => {
 $('settingsBtn').onclick = () => {
   $('goalInput').value = settings.goal;
   $('nickInput').value = settings.nick;
+  $('langInput').value = settings.lang;
   $('settingsModal').classList.remove('hidden');
 };
 $('closeSettings').onclick = () => $('settingsModal').classList.add('hidden');
+$('langInput').onchange = e => {
+  settings.lang = window.i18n.langs.some(l => l.code === e.target.value) ? e.target.value : 'en';
+  save();
+  window.i18n.setLang(settings.lang);
+};
 $('saveSettings').onclick = () => {
   settings.goal = Math.max(0, parseInt($('goalInput').value) || 0);
   settings.nick = $('nickInput').value.trim();
   save(); renderAll();
   $('settingsModal').classList.add('hidden');
-  toast('Zapisano ustawienia', 'check');
+  toast(t('toastSettings'), 'check');
 };
 $('wipeBtn').onclick = () => {
-  if (confirm('Na pewno usunąć WSZYSTKIE wpisy? Tego nie da się cofnąć.')) {
+  if (confirm(t('confirmWipe'))) {
     entries = []; save(); renderAll();
     $('settingsModal').classList.add('hidden');
-    toast('Dane usunięte', 'trash');
+    toast(t('toastWiped'), 'trash');
   }
 };
 
 /* --- toast --- */
 let toastTimer;
 function toast(msg, ico) {
-  const t = $('toast');
-  t.innerHTML = (ico ? svgIcon(ico) : '') + `<span>${msg}</span>`;
-  t.classList.remove('hidden');
+  const el = $('toast');
+  el.innerHTML = (ico ? svgIcon(ico) : '') + `<span>${msg}</span>`;
+  el.classList.remove('hidden');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.add('hidden'), 2200);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
 }
 
 /* --- init --- */
-renderMethods();
-renderAll();
+window.onLangChange = () => { renderMethods(); renderAll(); };
+window.i18n.setLang(settings.lang);
+$('langInput').value = settings.lang;
 setInterval(renderStats, 30000); // odświeżanie "od ostatniej"

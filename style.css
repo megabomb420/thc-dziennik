@@ -317,5 +317,15 @@ button,a,.btn,.chip,.method,.icon-btn{touch-action:manipulation}
 /* pola: mniejsza podpowiedź (była za duża), desktop bez wymuszania 16px */
 .log-extras input::placeholder,.modal-box input::placeholder{font-size:14px}
 @media (hover:hover) and (pointer:fine){
-  .log-extras input,.modal-box input,.time-box input[type="datetime-local"]{font-size:14px}
+  .log-extras input,.modal-box input,.modal-box select,.time-box input[type="datetime-local"]{font-size:14px}
 }
+
+/* select języka w ustawieniach */
+.modal-box select{display:block;width:100%;margin-top:6px;background:#0c1a12;border:1px solid #1e3a29;
+  border-radius:10px;padding:12px;color:var(--text);font-size:16px;font-family:inherit;
+  -webkit-appearance:none;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 20px) calc(50% - 2px),calc(100% - 14px) calc(50% - 2px);
+  background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+.modal-box select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 12px rgba(74,222,128,.2)}
+.modal-box select option{background:#0c1a12;color:var(--text)}

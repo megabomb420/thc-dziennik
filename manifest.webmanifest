@@ -1,7 +1,8 @@
 {
-  "name": "THC Dziennik",
-  "short_name": "THC Dziennik",
-  "description": "Dziennik sesji THC — samokontrola i redukcja",
+  "name": "THC Journal",
+  "short_name": "THC Journal",
+  "description": "THC session journal — self-control and reduction",
+  "lang": "en",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a140f",
