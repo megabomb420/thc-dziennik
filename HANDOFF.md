@@ -19,9 +19,17 @@ Offline behaviour is network-first with a cache fallback: the service worker alw
 
 Motion is progressive, not required: `prefers-reduced-motion` disables the canvas smoke, fireflies and bursts, the orbit/aurora animations, and the card scroll flow. Safe-area insets are handled for iPhone notch and home indicator.
 
-The app is meant to feel native rather than like a web page. Pinch zoom and double-tap zoom are blocked at three levels: the viewport meta (`user-scalable=no, maximum-scale=1`), `touch-action: pan-x pan-y` on the root, and JS guards in `fx.js` for iOS `gesture*` events, multi-finger `touchstart`, and a second tap inside 320 ms on non-control surfaces. Text inputs are 16px so iOS does not auto-zoom on focus, and `overscroll-behavior-y: none` removes rubber-band and pull-to-refresh.
+The app is meant to feel native rather than like a web page. Pinch zoom and double-tap zoom are blocked at three levels: the viewport meta (`user-scalable=no, maximum-scale=1`), `touch-action: pan-x pan-y` on the root, and JS guards in `fx.js` for iOS `gesture*` events, multi-finger `touchstart`, and a second tap inside 320 ms on non-control surfaces. `overscroll-behavior-y: none` removes rubber-band and pull-to-refresh. Text fields stay at 16px on touch devices, because that is the only dependable way to stop iOS focus zoom; on fine-pointer devices they are 14px, and placeholders are 14px everywhere.
 
 Cards are animated from JS, never CSS, so a JS failure leaves the page readable. `fx.js` writes only the independent `translate`, `scale` and `opacity` properties; the pointer tilt keeps using `transform`, so the two never overwrite each other. The loop is rAF-driven with per-frame lerp smoothing, stops when settled, and restarts on scroll, resize, visibility change and any body resize.
+
+## Release 1.2.1 — completed scope (2026-09-08)
+
+- **The save button was too loud.** The primary button's sheen (`::before`) went from `rgba(255,255,255,.45)` every 3.2 s to `rgba(255,255,255,.14)` every 6.5 s with a longer idle phase; base shadow `0 4px 18px rgba(34,197,94,.35)` → `0 3px 14px rgba(34,197,94,.26)`; hover glow `.5` → `.32` and `brightness(1.06)` → `1.03`; press `scale(.97)` → `scale(.98)`. The save burst dropped from 46 particles at speed 2–8 to 22 at speed 2–5, radius 2–6 → 2.2–4.8, glow blur 12 → 9, alpha `life` → `life * 0.8`. Note that the burst is only ever visible outside the card: the canvas sits under `.app`, so particles spawned at the button centre are hidden until they clear the card edge. That was already true before this release.
+- **Input labels were too large.** The 16px floor added in 1.2.0 stays on the field itself, but placeholders are back to 14px and fine-pointer devices drop the field back to 14px too. Touch devices keep 16px, so iOS still does not zoom on focus.
+- Version metadata 1.2.1 (`package.json`, footer `v1.2.1`) and `sw.js` `CACHE` bumped `v8` → `v9`.
+
+Validation: `node --check fx.js`. Computed styles with the real app: mobile context (390×844, touch) reports input `16px`, placeholder `14px`, sheen `6.5s`, button shadow `rgba(34,197,94,.26) 0 3px 14px`; desktop context (900px, fine pointer) reports input `14px`, placeholder `14px`. Screenshots of the log card confirm the smaller labels; burst frames 300 ms and 600 ms after saving show a soft spray of a few particles below the card rather than an explosion. No console errors.
 
 ## Release 1.2.0 — completed scope (2026-09-08)
 

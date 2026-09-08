@@ -70,15 +70,15 @@
   const bursts = [];
   window.fxBurst = (clientX, clientY) => {
     if (reduced) return;
-    for (let i = 0; i < 46; i++) {
+    for (let i = 0; i < 22; i++) {
       const a = Math.random() * Math.PI * 2;
-      const sp = (2 + Math.random() * 6) * DPR;
+      const sp = (2 + Math.random() * 3) * DPR;
       bursts.push({
         x: clientX * DPR, y: clientY * DPR,
-        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2 * DPR,
-        r: (2 + Math.random() * 4) * DPR,
-        life: 1, decay: 0.012 + Math.random() * 0.02,
-        hue: 110 + Math.random() * 60,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1 * DPR,
+        r: (2.2 + Math.random() * 2.6) * DPR,
+        life: 1, decay: 0.013 + Math.random() * 0.016,
+        hue: 118 + Math.random() * 30,
       });
     }
   };
@@ -126,12 +126,12 @@
     for (let i = bursts.length - 1; i >= 0; i--) {
       const b = bursts[i];
       b.x += b.vx; b.y += b.vy;
-      b.vy += 0.08 * DPR; b.vx *= 0.985;
+      b.vy += 0.05 * DPR; b.vx *= 0.98;
       b.life -= b.decay;
       if (b.life <= 0) { bursts.splice(i, 1); continue; }
-      ctx.fillStyle = `hsla(${b.hue},85%,62%,${b.life})`;
-      ctx.shadowColor = `hsla(${b.hue},90%,60%,.9)`;
-      ctx.shadowBlur = 12 * DPR;
+      ctx.fillStyle = `hsla(${b.hue},80%,58%,${b.life * 0.8})`;
+      ctx.shadowColor = `hsla(${b.hue},85%,55%,.7)`;
+      ctx.shadowBlur = 9 * DPR;
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r * b.life, 0, 7); ctx.fill();
       ctx.shadowBlur = 0;
     }

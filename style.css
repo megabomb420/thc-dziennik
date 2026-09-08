@@ -162,14 +162,14 @@ header{display:flex;justify-content:space-between;align-items:center;padding:8px
 .log-actions{display:flex;gap:10px}
 .btn{border:none;border-radius:14px;padding:14px 18px;font-size:13px;letter-spacing:.6px;font-weight:700;cursor:pointer;transition:.15s;color:var(--text)}
 .btn.primary{flex:1;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#06240f;
-  box-shadow:0 4px 18px rgba(34,197,94,.35);position:relative}
+  box-shadow:0 3px 14px rgba(34,197,94,.26);position:relative}
 .btn.primary::before{content:'';position:absolute;inset:0;border-radius:14px;
-  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);
-  background-size:280% 100%;background-position:200% 0;pointer-events:none;
-  animation:btnSheen 3.2s ease-in-out infinite}
-@keyframes btnSheen{0%,55%{background-position:200% 0}85%,100%{background-position:-80% 0}}
-.btn.primary:hover{box-shadow:0 6px 26px rgba(74,222,128,.5);filter:brightness(1.06)}
-.btn.primary:active{transform:scale(.97)}
+  background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.14) 50%,transparent 62%);
+  background-size:300% 100%;background-position:200% 0;pointer-events:none;
+  animation:btnSheen 6.5s ease-in-out infinite}
+@keyframes btnSheen{0%,58%{background-position:200% 0}88%,100%{background-position:-100% 0}}
+.btn.primary:hover{box-shadow:0 4px 18px rgba(74,222,128,.32);filter:brightness(1.03)}
+.btn.primary:active{transform:scale(.98)}
 .btn.ghost{background:#0e1d14;border:1px solid #1e3a29;transition:.15s}
 .btn.ghost:hover{border-color:rgba(74,222,128,.4);color:var(--accent)}
 .btn.small{padding:8px 12px;font-size:13px}
@@ -313,3 +313,9 @@ body{overscroll-behavior-y:none}
 button,a,.btn,.chip,.method,.icon-btn{touch-action:manipulation}
 .log-extras input,.modal-box input,.time-box input[type="datetime-local"]{font-size:16px}
 .card{will-change:transform,translate,opacity,scale}
+
+/* pola: mniejsza podpowiedź (była za duża), desktop bez wymuszania 16px */
+.log-extras input::placeholder,.modal-box input::placeholder{font-size:14px}
+@media (hover:hover) and (pointer:fine){
+  .log-extras input,.modal-box input,.time-box input[type="datetime-local"]{font-size:14px}
+}
