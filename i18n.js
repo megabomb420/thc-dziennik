@@ -1,5 +1,7 @@
 /* ===== I18N: angielski (domyślny) + polski ===== */
 (() => {
+  const APP_VERSION = '1.3.3';   // jedno źródło dla UI (package.json musi zostać zgodny)
+
   const STRINGS = {
     en: {
       locale: 'en-GB',
@@ -14,6 +16,7 @@
       goalToday: 'Today: {a}/{b}',
       goalOver: 'Limit exceeded: {a}/{b}',
       logTitle: 'Log a session',
+      methodGroup: 'Session method',
       amountPh: 'Amount (optional, g / mg)',
       notePh: 'Note (mood, reason…)',
       amountAria: 'Amount in grams or milligrams, optional',
@@ -21,13 +24,13 @@
       logNow: 'Log now',
       logCustom: 'Pick a time',
       chartTitle: 'Last 7 days',
+      chartAria: 'Bar chart, last 7 days: {d}',
       historyTitle: 'History',
       exportJson: 'Export JSON',
       empty: 'No entries yet — log your first session to start tracking your rhythm',
-      footer: 'data stays on this device only · v1.3.2',
+      footer: 'data stays on this device only · v{v}',
       settings: 'Settings',
       goalLabel: 'Daily session limit (0 = no limit)',
-      nickLabel: 'Nickname (optional)',
       langLabel: 'Language',
       save: 'Save',
       cancel: 'Cancel',
@@ -40,12 +43,13 @@
       timeLabel: 'or an exact date and time',
       toastSaved: 'Saved: {m}',
       toastPickTime: 'Pick a date and time',
+      toastBadTime: 'That date is not valid',
       toastSettings: 'Settings saved',
       toastWiped: 'Data deleted',
       toastStorageFull: 'Could not save — device storage is full',
       confirmWipe: 'Delete ALL entries? This cannot be undone.',
       ariaSettings: 'Settings',
-      ariaDelete: 'Delete entry',
+      deleteEntry: 'Delete {m} entry',
       titleDelete: 'Delete',
       method_dab: 'Dab',
       method_vape: 'Vape',
@@ -67,6 +71,7 @@
       goalToday: 'Dzisiejszy limit: {a}/{b}',
       goalOver: 'Limit przekroczony: {a}/{b}',
       logTitle: 'Zapisz sesję',
+      methodGroup: 'Metoda sesji',
       amountPh: 'Ilość (opcjonalnie, g / mg)',
       notePh: 'Notatka (nastrój, powód…)',
       amountAria: 'Ilość w gramach lub miligramach, opcjonalnie',
@@ -74,13 +79,13 @@
       logNow: 'Zapisz teraz',
       logCustom: 'Wybierz godzinę',
       chartTitle: 'Ostatnie 7 dni',
+      chartAria: 'Wykres słupkowy, ostatnie 7 dni: {d}',
       historyTitle: 'Historia',
       exportJson: 'Eksport JSON',
       empty: 'Brak wpisów — zapisz pierwszą sesję, żeby zacząć śledzić swój rytm',
-      footer: 'dane zapisują się lokalnie na tym urządzeniu · v1.3.2',
+      footer: 'dane zapisują się lokalnie na tym urządzeniu · v{v}',
       settings: 'Ustawienia',
       goalLabel: 'Dzienny limit sesji (0 = bez limitu)',
-      nickLabel: 'Nick (opcjonalnie)',
       langLabel: 'Język',
       save: 'Zapisz',
       cancel: 'Anuluj',
@@ -93,12 +98,13 @@
       timeLabel: 'albo dokładna data i godzina',
       toastSaved: 'Zapisano: {m}',
       toastPickTime: 'Wybierz datę i godzinę',
+      toastBadTime: 'Nieprawidłowa data',
       toastSettings: 'Zapisano ustawienia',
       toastWiped: 'Dane usunięte',
       toastStorageFull: 'Nie udało się zapisać — brak miejsca na urządzeniu',
       confirmWipe: 'Na pewno usunąć WSZYSTKIE wpisy? Tego nie da się cofnąć.',
       ariaSettings: 'Ustawienia',
-      ariaDelete: 'Usuń wpis',
+      deleteEntry: 'Usuń wpis: {m}',
       titleDelete: 'Usuń',
       method_dab: 'Dab',
       method_vape: 'Vape',
@@ -117,8 +123,8 @@
     let s = table()[key];
     if (s == null) s = STRINGS[DEFAULT][key];
     if (s == null) return key;
-    if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : ''));
-    return s;
+    const all = Object.assign({ v: APP_VERSION }, vars);
+    return s.replace(/\{(\w+)\}/g, (m, k) => (all[k] != null ? all[k] : ''));
   }
 
   function apply() {
@@ -146,6 +152,7 @@
   window.i18n = {
     t,
     setLang,
+    version: APP_VERSION,
     get lang() { return lang; },
     locale: () => table().locale,
     weekdays: () => table().weekdays,

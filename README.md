@@ -53,6 +53,16 @@ albo dowolny statyczny serwer, np. `python -m http.server` lub `npx serve .`
 
 Service worker wymaga adresu `http(s)` — przez `file://` aplikacja wczyta się, ale nie zadziała offline.
 
+## Testy
+
+```bash
+npm install
+npx playwright install chromium
+npm test
+```
+
+`tests/smoke.spec.mjs` (Playwright) pokrywa: pusty stan, zapis sesji, limit dzienny i jego przekroczenie, usuwanie wpisu, przełączanie EN/PL z cofaniem przez „Anuluj", zamykanie modala Escape z powrotem fokusu, wstrzyknięcie HTML przez notatkę, uszkodzony `localStorage` oraz działanie offline. `scripts/serve.mjs` to serwer statyczny bez zależności, używany w testach; `.github/workflows/ci.yml` uruchamia je przy każdym pushu i PR.
+
 ## Deploy
 
 Czysta statyczna strona — leci na GitHub Pages (gałąź `main`, katalog główny). Po pushu sprawdź wersję w stopce i nazwę `CACHE` w `sw.js`, żeby upewnić się, że nowy shell się rozpropagował.

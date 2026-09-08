@@ -10,6 +10,8 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preload" href="fonts/chakra-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/chakra-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -69,12 +71,12 @@
   <!-- SZYBKI ZAPIS -->
   <section class="card log-card">
     <h2 data-i18n="logTitle">Log a session</h2>
-    <div class="methods" id="methods"></div>
+    <div class="methods" id="methods" role="group" data-i18n-aria="methodGroup" aria-label="Session method"></div>
     <div class="log-extras">
-      <input type="number" id="amountInput" min="0" step="0.05"
+      <input type="number" id="amountInput" min="0" step="0.05" inputmode="decimal" autocomplete="off"
         data-i18n-placeholder="amountPh" data-i18n-aria="amountAria"
         placeholder="Amount (optional, g / mg)">
-      <input type="text" id="noteInput" maxlength="80"
+      <input type="text" id="noteInput" maxlength="80" autocomplete="off"
         data-i18n-placeholder="notePh" data-i18n-aria="noteAria"
         placeholder="Note (mood, reason…)">
     </div>
@@ -87,7 +89,7 @@
   <!-- WYKRES 7 DNI -->
   <section class="card">
     <h2 data-i18n="chartTitle">Last 7 days</h2>
-    <div class="chart" id="chart"></div>
+    <div class="chart" id="chart" role="img" aria-label="Last 7 days"></div>
   </section>
 
   <!-- HISTORIA -->
@@ -99,18 +101,15 @@
     <div id="history" class="history"></div>
   </section>
 
-  <footer data-i18n="footer">data stays on this device only · v1.3.2</footer>
+  <footer data-i18n="footer">data stays on this device only · v1.3.3</footer>
 </div>
 
 <!-- MODAL USTAWIEŃ -->
 <div class="modal hidden" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-  <div class="modal-box">
+  <div class="modal-box" tabindex="-1">
     <h2 class="with-ico" id="settingsTitle"><span data-icon="sliders"></span><span data-i18n="settings">Settings</span></h2>
     <label><span data-i18n="goalLabel">Daily session limit (0 = no limit)</span>
-      <input type="number" id="goalInput" min="0" max="50">
-    </label>
-    <label><span data-i18n="nickLabel">Nickname (optional)</span>
-      <input type="text" id="nickInput" maxlength="30">
+      <input type="number" id="goalInput" min="0" max="50" inputmode="numeric">
     </label>
     <label><span data-i18n="langLabel">Language</span>
       <select id="langInput">
@@ -128,7 +127,7 @@
 
 <!-- MODAL WŁASNEJ GODZINY -->
 <div class="modal hidden" id="timeModal" role="dialog" aria-modal="true" aria-labelledby="timeTitle">
-  <div class="modal-box time-box">
+  <div class="modal-box time-box" tabindex="-1">
     <h2 class="with-ico" id="timeTitle"><span data-icon="clock"></span><span data-i18n="timeTitle">When was it?</span></h2>
     <div class="quick-times">
       <button class="chip" data-min="15" data-i18n="ago15">15 min ago</button>
@@ -155,6 +154,10 @@
 <script>
 if ('serviceWorker' in navigator) {
   let reloaded = false;
+  // przeładuj tylko przy AKTUALIZACJI; pierwsza instalacja nie może resetować formularza
+  const hadController = !!navigator.serviceWorker.controller;
+  const reloadOnce = () => { if (hadController && !reloaded) { reloaded = true; location.reload(); } };
+
   navigator.serviceWorker.register('sw.js').then(reg => {
     // sprawdzaj aktualizacje co jakiś czas i przy powrocie do apki
     setInterval(() => reg.update(), 60000);
@@ -163,18 +166,14 @@ if ('serviceWorker' in navigator) {
     });
     reg.addEventListener('updatefound', () => {
       const sw = reg.installing;
-      sw && sw.addEventListener('statechange', () => {
-        if (sw.state === 'activated' && !reloaded) { reloaded = true; location.reload(); }
-      });
+      sw && sw.addEventListener('statechange', () => { if (sw.state === 'activated') reloadOnce(); });
     });
   }).catch(()=>{});
   // nowa wersja przejęła kontrolę → przeładuj na świeże pliki
   navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data && e.data.type === 'SW_UPDATED' && !reloaded) { reloaded = true; location.reload(); }
+    if (e.data && e.data.type === 'SW_UPDATED') reloadOnce();
   });
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!reloaded) { reloaded = true; location.reload(); }
-  });
+  navigator.serviceWorker.addEventListener('controllerchange', reloadOnce);
 }
 </script>
 </body>

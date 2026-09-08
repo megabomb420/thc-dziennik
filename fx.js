@@ -25,7 +25,7 @@
 
   let W, H, DPR;
   function resize() {
-    DPR = Math.min(2, devicePixelRatio || 1);
+    DPR = Math.min(1.5, devicePixelRatio || 1);
     W = canvas.width = innerWidth * DPR;
     H = canvas.height = innerHeight * DPR;
     canvas.style.width = innerWidth + 'px';
@@ -136,9 +136,8 @@
       ctx.shadowBlur = 0;
     }
 
-    requestAnimationFrame(frame);
   }
-  if (!reduced || true) frame();
+  requestAnimationFrame(frame);
 
   /* --- tilt 3D kart --- */
   if (!reduced && matchMedia('(pointer:fine)').matches) {

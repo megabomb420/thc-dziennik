@@ -25,6 +25,21 @@ The app is meant to feel native rather than like a web page. Pinch zoom and doub
 
 Cards are animated from JS, never CSS, so a JS failure leaves the page readable. `fx.js` writes only the independent `translate`, `scale` and `opacity` properties; the pointer tilt keeps using `transform`, so the two never overwrite each other. The loop is rAF-driven with per-frame lerp smoothing, stops when settled, and restarts on scroll, resize, visibility change and any body resize.
 
+## Release 1.3.3 — completed scope (2026-09-08)
+
+Finishing pass toward 10/10 — the gaps left open by 1.3.2, plus a bug the new tests found.
+
+- **The first visit no longer reloads the page.** The service worker's `clients.claim()` fired `controllerchange` on first install and the inline handler reloaded unconditionally, throwing away the first load and any input typed in that window. All three reload paths (`controllerchange`, `SW_UPDATED`, `updatefound` → activated) now run only when `navigator.serviceWorker.controller` already existed, i.e. on a genuine update. Verified: exactly one navigation on first visit with the worker active.
+- **Modal focus management.** `openModal`/`closeModal` remember the trigger, move focus into the dialog (`.modal-box` is `tabindex="-1"`), trap Tab/Shift+Tab inside it, close on Escape — the settings modal routes through `closeSettings`, so a language preview is reverted too — and return focus to the trigger on close. Clicking the settings backdrop now also closes it.
+- **Remaining accessibility gaps closed.** The chart is one `role="img"` with a generated label ("Bar chart, last 7 days: We 2, Th 5, …"); the method grid is an `aria-label`ed `role="group"`; delete buttons name their entry ("Delete Dry herb vape entry"); the amount field uses `inputmode="decimal"` and both log inputs opt out of autofill.
+- **Dead setting removed.** The Nickname field was stored but never displayed anywhere; it is gone from the modal, the schema and the strings.
+- **One source for the version.** `APP_VERSION` in `i18n.js` feeds the footer through a `{v}` placeholder, so only `package.json` and that constant need bumping (previously three places).
+- **Timestamps are validated.** `addEntry` rejects a non-finite timestamp, and "pick a time" reports an invalid date instead of writing `NaN` into storage.
+- **Cheaper canvas.** The FX canvas caps DPR at 1.5 (soft smoke does not need 2×) and skips drawing while the document is hidden.
+- **Tests and CI.** `tests/smoke.spec.mjs` (Playwright, 9 tests) covers load/empty state, logging, the daily limit and its over state, deletion, the EN/PL switch with Cancel reverting, Escape closing a modal with focus return, HTML injection through a note, a corrupted `localStorage`, and offline operation. `scripts/serve.mjs` is a dependency-free static server for the test run; `.github/workflows/ci.yml` runs `npm ci` → `playwright install chromium` → `npm test` on every push and PR.
+
+Validation: `npm test` — 9/9. Full audit re-run: 16/16 functional and resilience checks pass (no XSS execution, corrupted storage recovers with zero page errors); accessibility reports zero unnamed controls, zero unlabelled inputs, zero sub-44px targets, footer contrast 7.76:1, toast `aria-live="polite"`, both dialogs `role="dialog" aria-modal="true"` and an `h1` present; Chromium idles at 57–60 fps; headless WebKit still logs, switches language and animates with no console errors. The new suite also caught the first-visit reload bug above, which no earlier pass had exercised.
+
 ## Release 1.3.2 — completed scope (2026-09-08)
 
 Fixes from a full test pass (Chromium + WebKit: functional, resilience, accessibility, PWA, performance).

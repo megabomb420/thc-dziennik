@@ -33,7 +33,6 @@ function loadSettings() {
   const goal = parseInt(s.goal, 10);
   return {
     goal: isFinite(goal) ? Math.max(0, Math.min(50, goal)) : 0,
-    nick: typeof s.nick === 'string' ? s.nick.slice(0, 30) : '',
     lang: s.lang === 'pl' ? 'pl' : 'en',
   };
 }
@@ -71,6 +70,41 @@ function fmtSince(ms) {
 function sameDay(a, b) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
+
+/* ---------- modale: fokus, Escape, powrót fokusu ---------- */
+let lastFocused = null, activeModal = null;
+const focusables = m => [...m.querySelectorAll('button,input,select,textarea,a[href]')]
+  .filter(el => !el.disabled && el.getClientRects().length > 0);
+
+function openModal(modal) {
+  lastFocused = document.activeElement;
+  activeModal = modal;
+  modal.classList.remove('hidden');
+  const first = focusables(modal)[0];
+  (first || modal.querySelector('.modal-box')).focus();
+}
+
+function closeModal(modal) {
+  modal.classList.add('hidden');
+  if (activeModal === modal) activeModal = null;
+  if (lastFocused && lastFocused.focus) lastFocused.focus();
+  lastFocused = null;
+}
+
+document.addEventListener('keydown', e => {
+  if (!activeModal) return;
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    if (activeModal.id === 'settingsModal') closeSettings(); else closeTimeModal();
+    return;
+  }
+  if (e.key !== 'Tab') return;
+  const f = focusables(activeModal);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 
 /* --- metody --- */
 function renderMethods() {
@@ -124,12 +158,15 @@ function renderChart() {
   const counts = days.map(d => entries.filter(e => sameDay(new Date(e.t), d)).length);
   const max = Math.max(1, ...counts);
   const names = window.i18n.weekdays();
-  $('chart').innerHTML = days.map((d, i) => `
+  const chart = $('chart');
+  chart.innerHTML = days.map((d, i) => `
     <div class="bar-col">
       <span class="bar-count">${counts[i] || ''}</span>
       <div class="bar ${i === 6 ? 'today' : ''}" style="height:${counts[i] / max * 72 + 4}px"></div>
       <span class="bar-label">${names[d.getDay()]}</span>
     </div>`).join('');
+  chart.setAttribute('aria-label',
+    t('chartAria', { d: days.map((d, i) => `${names[d.getDay()]} ${counts[i]}`).join(', ') }));
 }
 
 /* --- historia --- */
@@ -155,7 +192,8 @@ function renderHistory() {
       <div class="e-main"><div class="e-method">${methodName(id)}</div>
       ${extra ? `<div class="e-note">${extra}</div>` : ''}</div>
       <div class="e-time">${when}</div>
-      <button class="e-del" data-id="${esc(e.id)}" title="${t('titleDelete')}" aria-label="${t('ariaDelete')}">${svgIcon('close')}</button>
+      <button class="e-del" data-id="${esc(e.id)}" title="${t('titleDelete')}"
+        aria-label="${esc(t('deleteEntry', { m: methodName(id) }))}">${svgIcon('close')}</button>
     </div>`;
   }).join('');
   el.querySelectorAll('.e-del').forEach(b => b.onclick = () => {
@@ -168,6 +206,7 @@ function renderAll() { renderStats(); renderChart(); renderHistory(); }
 
 /* --- zapis --- */
 function addEntry(ts) {
+  if (typeof ts !== 'number' || !isFinite(ts)) { toast(t('toastBadTime'), 'alert'); return; }
   entries.push({
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     t: ts,
@@ -190,9 +229,9 @@ $('logNow').onclick = () => addEntry(Date.now());
 function openTimeModal() {
   const c = $('customTime');
   c.value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-  $('timeModal').classList.remove('hidden');
+  openModal($('timeModal'));
 }
-function closeTimeModal() { $('timeModal').classList.add('hidden'); }
+function closeTimeModal() { closeModal($('timeModal')); }
 
 $('logCustom').onclick = openTimeModal;
 $('cancelTime').onclick = closeTimeModal;
@@ -200,7 +239,9 @@ $('timeModal').addEventListener('click', e => { if (e.target === $('timeModal'))
 $('confirmTime').onclick = () => {
   const v = $('customTime').value;
   if (!v) { toast(t('toastPickTime'), 'alert'); return; }
-  addEntry(new Date(v).getTime());
+  const ts = new Date(v).getTime();
+  if (!isFinite(ts)) { toast(t('toastBadTime'), 'alert'); return; }
+  addEntry(ts);
   closeTimeModal();
 };
 document.querySelectorAll('.quick-times .chip').forEach(chip => chip.onclick = () => {
@@ -223,17 +264,17 @@ let langAtOpen = settings.lang;
 $('settingsBtn').onclick = () => {
   langAtOpen = settings.lang;
   $('goalInput').value = settings.goal;
-  $('nickInput').value = settings.nick;
   $('langInput').value = settings.lang;
-  $('settingsModal').classList.remove('hidden');
+  openModal($('settingsModal'));
 };
 
 // wyjście bez zapisu cofa podgląd języka
 function closeSettings() {
   if (window.i18n.lang !== langAtOpen) window.i18n.setLang(langAtOpen);
-  $('settingsModal').classList.add('hidden');
+  closeModal($('settingsModal'));
 }
 $('closeSettings').onclick = closeSettings;
+$('settingsModal').addEventListener('click', e => { if (e.target === $('settingsModal')) closeSettings(); });
 
 // podgląd na żywo; zapis dopiero w "Zapisz"
 $('langInput').onchange = e => {
@@ -245,10 +286,9 @@ $('saveSettings').onclick = () => {
   const code = $('langInput').value;
   settings.lang = window.i18n.langs.some(l => l.code === code) ? code : 'en';
   settings.goal = Math.max(0, Math.min(50, parseInt($('goalInput').value, 10) || 0));
-  settings.nick = $('nickInput').value.trim().slice(0, 30);
   save(); renderAll();
   langAtOpen = settings.lang;
-  $('settingsModal').classList.add('hidden');
+  closeModal($('settingsModal'));
   toast(t('toastSettings'), 'check');
 };
 $('wipeBtn').onclick = () => {
