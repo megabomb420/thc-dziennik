@@ -25,6 +25,13 @@ The app is meant to feel native rather than like a web page. Pinch zoom and doub
 
 Cards are animated from JS, never CSS, so a JS failure leaves the page readable. `fx.js` writes only the independent `translate`, `scale` and `opacity` properties; the pointer tilt keeps using `transform`, so the two never overwrite each other. The loop is rAF-driven with per-frame lerp smoothing, stops when settled, and restarts on scroll, resize, visibility change and any body resize.
 
+## Release 1.3.1 — completed scope (2026-09-08)
+
+- **The language select now behaves like the rest of the form.** 1.3.0 applied and persisted the language the moment the dropdown changed, which made Cancel a lie. Changing the dropdown is now a live preview only: it re-renders the UI so the choice can be judged, but `settings.lang` is untouched until Save. Cancel — and the wipe action, which also closes the modal — restore the language that was active when the modal opened. Save writes `settings.lang` and re-bases that restore point, so a later Cancel does not undo a committed choice.
+- Version metadata 1.3.1 (both footer strings in `i18n.js`, `package.json`) and `sw.js` `CACHE` bumped `v10` → `v11`.
+
+Validation: headless Chrome at 390×844. Open Settings and switch to Polski — the UI switches live while the modal stays open; press Cancel — the UI and `document.documentElement.lang` return to English and a reload confirms `settings.lang` is still `en`. Repeat and press Save — Polish persists across a reload. The wipe-data path also restores the pre-open language. No console errors.
+
 ## Release 1.3.0 — completed scope (2026-09-08)
 
 - **English is now the default language; Polish moved into Settings.** A new `i18n.js` holds both string tables and exposes `i18n.t(key, vars)`, `i18n.setLang(code)`, `i18n.locale()` and `i18n.weekdays()`. Static copy in `index.html` is marked with `data-i18n` / `data-i18n-placeholder` / `data-i18n-title` / `data-i18n-aria` and applied on load and on every change; `document.documentElement.lang` and `document.title` follow the choice. `app.js` reads every user-facing string through `t()` and re-renders methods, stats, chart and history from `window.onLangChange`, so switching is instant with no reload. Any unknown or missing `lang` falls back to English.

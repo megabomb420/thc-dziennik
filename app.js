@@ -176,29 +176,43 @@ $('exportBtn').onclick = () => {
 };
 
 /* --- ustawienia --- */
+let langAtOpen = settings.lang;
+
 $('settingsBtn').onclick = () => {
+  langAtOpen = settings.lang;
   $('goalInput').value = settings.goal;
   $('nickInput').value = settings.nick;
   $('langInput').value = settings.lang;
   $('settingsModal').classList.remove('hidden');
 };
-$('closeSettings').onclick = () => $('settingsModal').classList.add('hidden');
+
+// wyjście bez zapisu cofa podgląd języka
+function closeSettings() {
+  if (window.i18n.lang !== langAtOpen) window.i18n.setLang(langAtOpen);
+  $('settingsModal').classList.add('hidden');
+}
+$('closeSettings').onclick = closeSettings;
+
+// podgląd na żywo; zapis dopiero w "Zapisz"
 $('langInput').onchange = e => {
-  settings.lang = window.i18n.langs.some(l => l.code === e.target.value) ? e.target.value : 'en';
-  save();
-  window.i18n.setLang(settings.lang);
+  const code = e.target.value;
+  window.i18n.setLang(window.i18n.langs.some(l => l.code === code) ? code : 'en');
 };
+
 $('saveSettings').onclick = () => {
+  const code = $('langInput').value;
+  settings.lang = window.i18n.langs.some(l => l.code === code) ? code : 'en';
   settings.goal = Math.max(0, parseInt($('goalInput').value) || 0);
   settings.nick = $('nickInput').value.trim();
   save(); renderAll();
+  langAtOpen = settings.lang;
   $('settingsModal').classList.add('hidden');
   toast(t('toastSettings'), 'check');
 };
 $('wipeBtn').onclick = () => {
   if (confirm(t('confirmWipe'))) {
     entries = []; save(); renderAll();
-    $('settingsModal').classList.add('hidden');
+    closeSettings();
     toast(t('toastWiped'), 'trash');
   }
 };
