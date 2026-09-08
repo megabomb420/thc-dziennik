@@ -1,9 +1,27 @@
 /* ===== FX: dym, cząsteczki, eksplozje, tilt, ripple ===== */
 (() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ===== FEEL APLIKACJI: blokada pinch-zoom i double-tap zoom ===== */
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev =>
+    document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
+
+  document.addEventListener('touchstart', e => {
+    if (e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+
+  let lastTap = 0;
+  document.addEventListener('touchend', e => {
+    const now = Date.now();
+    const onControl = e.target instanceof Element &&
+      e.target.closest('button,a,input,textarea,select,label,.method,.chip,.btn');
+    if (now - lastTap < 320 && !onControl) e.preventDefault();
+    lastTap = now;
+  }, { passive: false });
+
   const canvas = document.getElementById('fx');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let W, H, DPR;
   function resize() {
@@ -166,4 +184,48 @@
       if (k < 1) requestAnimationFrame(step);
     })(start);
   };
+
+  /* ===== PRZEWIJANIE: karty płyną ===== */
+  if (!reduced) {
+    const items = [...document.querySelectorAll('.card')]
+      .map(el => ({ el, ty: 34, op: 0, sc: 0.96 }));
+    let raf = 0;
+
+    // stan startowy synchronicznie, żeby nie było mignięcia
+    for (const c of items) {
+      c.el.style.translate = '0 34px';
+      c.el.style.opacity = '0';
+      c.el.style.scale = '0.96';
+    }
+
+    function step() {
+      const H = innerHeight || 1;
+      let moving = false;
+      for (const c of items) {
+        const top = c.el.getBoundingClientRect().top;
+        let p = (H - top) / (H * 0.62);
+        p = p < 0 ? 0 : p > 1 ? 1 : p;
+        const e = p * p * (3 - 2 * p);          // smoothstep
+        const tyT = (1 - e) * 34;
+        const opT = 0.2 + e * 0.8;
+        const scT = 0.96 + e * 0.04;
+        c.ty += (tyT - c.ty) * 0.18;            // wygładzenie -> "płynięcie"
+        c.op += (opT - c.op) * 0.18;
+        c.sc += (scT - c.sc) * 0.18;
+        if (Math.abs(tyT - c.ty) > 0.05 || Math.abs(opT - c.op) > 0.002 ||
+            Math.abs(scT - c.sc) > 0.0005) moving = true;
+        c.el.style.translate = '0 ' + c.ty.toFixed(2) + 'px';
+        c.el.style.opacity = c.op.toFixed(3);
+        c.el.style.scale = c.sc.toFixed(4);
+      }
+      raf = moving ? requestAnimationFrame(step) : 0;
+    }
+
+    const kick = () => { if (!raf) raf = requestAnimationFrame(step); };
+    addEventListener('scroll', kick, { passive: true });
+    addEventListener('resize', kick);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(); });
+    new ResizeObserver(kick).observe(document.body);
+    kick();
+  }
 })();

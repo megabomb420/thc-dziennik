@@ -14,6 +14,7 @@ Bez backendu, bez konta, bez zależności w runtime: statyczne pliki, a dane zos
 - Dzienny limit sesji z paskiem postępu (tryb redukcji)
 - Eksport danych do JSON
 - Działa offline, instalowalna jako PWA, dane tylko lokalnie (localStorage)
+- Zachowuje się jak apka, nie strona: brak zoomu (pinch i double-tap), brak gumowania przy scrollu, karty płynnie wjeżdżają podczas przewijania
 
 ## Grafika
 

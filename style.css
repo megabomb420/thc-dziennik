@@ -305,3 +305,11 @@ h2.with-ico svg{width:18px;height:18px;color:var(--accent)}
 .goal-text svg{width:14px;height:14px;color:var(--accent)}
 .goal-text.over{color:var(--danger)}
 .goal-text.over svg{color:var(--danger)}
+
+/* ===== FEEL APLIKACJI (v1.2): brak zoomu, brak gumowania, 16px inputy ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;
+  touch-action:pan-x pan-y;overscroll-behavior-y:none}
+body{overscroll-behavior-y:none}
+button,a,.btn,.chip,.method,.icon-btn{touch-action:manipulation}
+.log-extras input,.modal-box input,.time-box input[type="datetime-local"]{font-size:16px}
+.card{will-change:transform,translate,opacity,scale}

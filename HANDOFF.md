@@ -17,7 +17,19 @@ Each method owns one accent colour exposed as `--m` on `.m-dab` … `.m-oil`. Th
 
 Offline behaviour is network-first with a cache fallback: the service worker always tries the network, caches a good response, and serves the cache only when offline. Because of that, the `CACHE` constant in `sw.js` must be bumped on every release or installed clients can keep an old shell. `ASSETS` must list every file that has to exist offline.
 
-Motion is progressive, not required: `prefers-reduced-motion` disables the canvas smoke, fireflies and bursts, and the orbit/aurora animations. Safe-area insets are handled for iPhone notch and home indicator.
+Motion is progressive, not required: `prefers-reduced-motion` disables the canvas smoke, fireflies and bursts, the orbit/aurora animations, and the card scroll flow. Safe-area insets are handled for iPhone notch and home indicator.
+
+The app is meant to feel native rather than like a web page. Pinch zoom and double-tap zoom are blocked at three levels: the viewport meta (`user-scalable=no, maximum-scale=1`), `touch-action: pan-x pan-y` on the root, and JS guards in `fx.js` for iOS `gesture*` events, multi-finger `touchstart`, and a second tap inside 320 ms on non-control surfaces. Text inputs are 16px so iOS does not auto-zoom on focus, and `overscroll-behavior-y: none` removes rubber-band and pull-to-refresh.
+
+Cards are animated from JS, never CSS, so a JS failure leaves the page readable. `fx.js` writes only the independent `translate`, `scale` and `opacity` properties; the pointer tilt keeps using `transform`, so the two never overwrite each other. The loop is rAF-driven with per-frame lerp smoothing, stops when settled, and restarts on scroll, resize, visibility change and any body resize.
+
+## Release 1.2.0 — completed scope (2026-09-08)
+
+- **Zoom is blocked.** Viewport meta now carries `maximum-scale=1.0, user-scalable=no`. `html` gets `touch-action: pan-x pan-y` (no pinch, no double-tap zoom, scrolling still works) and `overscroll-behavior-y: none` on `html`/`body`. Because iOS ignores the meta tag, `fx.js` also prevents `gesturestart`/`gesturechange`/`gestureend`, cancels any `touchstart` with more than one finger, and cancels a second `touchend` inside 320 ms — but only when it does not land on a control (`button, a, input, textarea, select, label, .method, .chip, .btn`), so rapid taps on the save button still register. Buttons and chips carry `touch-action: manipulation`. Text inputs were raised to 16px (`.log-extras input`, `.modal-box input`, the datetime field) to stop iOS focus auto-zoom.
+- **Cards flow while scrolling.** Each `.card` starts at `translate 0 34px`, `scale .96`, `opacity 0` and eases to rest as it rises into the viewport. Progress is the card's distance from the viewport bottom over 62% of viewport height, run through a smoothstep, then lerped 0.18 per frame so the motion trails the scroll instead of snapping to it. The loop only writes `translate`, `scale` and `opacity`; the desktop tilt in `fx.js` still owns `transform`, so both compose. It is driven by rAF and stops once settled, waking on scroll/resize/visibilitychange and a `ResizeObserver` on `body` (so adding a history entry re-settles the layout). With `prefers-reduced-motion` the block is skipped entirely and no inline styles are written.
+- Version metadata 1.2.0 (`package.json`, footer `v1.2`) and `sw.js` `CACHE` bumped `v7` → `v8`. No changes to storage, statistics or the icon set.
+
+Validation: `node --check fx.js`. Headless Chrome at 390×844 with touch enabled: viewport meta correct, computed `touch-action: pan-x pan-y`, computed `overscroll-behavior-y: none`, synthetic two-finger `touchstart` cancelled, `gesturestart` cancelled, second rapid `touchend` cancelled — all four reported `defaultPrevented: true`. Card state sampled at three scroll positions: below the fold cards sat at `op .2 / ty 34 / sc .96`, and every card reached `op 1 / ty 0 / sc 1` once scrolled into view. Desktop pass confirmed tilt (`transform: perspective(900px) rotateY(...)`) coexists with `translate`/`scale`/`opacity`; a `reducedMotion: reduce` context rendered all cards at computed `opacity 1` with no inline styles. No console errors or page errors in any pass.
 
 ## Release 1.1.0 — completed scope (2026-09-08)
 
@@ -33,11 +45,11 @@ Validation: `node --check` on `app.js`, `icons.js` and `fx.js`. Headless Chrome 
 
 ## Pause / resume point
 
-Baseline for any resume is commit `acb967e` on `main` ("🌿 Wektorowe ikony zamiast emoji…"); the live site is the Pages build of that commit. This file did not exist before 1.1.0 — there is no earlier handoff to reconcile.
+Baseline for any resume is the latest release commit on `main` — currently the 1.2.0 release, whose Pages build is the live site. This file was created with 1.1.0; there is no earlier handoff to reconcile.
 
 Known gaps, none of them blockers:
 
-- Only headless Chrome was used. Physical iOS Safari has not been tested; the safe-area and `color-mix` fallbacks are written for it but unverified on hardware.
+- Only headless Chrome was used. Physical iOS Safari has not been tested, and 1.2.0 depends on it most: the zoom guards exist precisely because iOS ignores `user-scalable=no`, and the 16px input sizing targets iOS focus auto-zoom. Chrome on Android pinch blocking is likewise unverified on a device. Verify both before trusting the app-feel work.
 - `preview.png`, `preview2.png` and `preview3.png` in the repository are stale pre-1.1 screenshots (420px-wide crops) and are not referenced by the README. Either regenerate them from the current UI or delete them; do not treat them as documentation.
 - `icons/icon-512-maskable.png` is not listed in `sw.js` `ASSETS` (pre-existing). It is only needed at install time, so this is harmless, but adding it keeps the precache complete.
 - The repository has no test tooling and no CI beyond the Pages build. Verification is manual plus ad-hoc Playwright scripts; do not assume a `npm test` exists.
