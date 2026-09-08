@@ -359,3 +359,14 @@ footer{color:var(--muted)}
 .hist-actions{display:flex;gap:8px;margin-left:auto}
 .hist-actions .btn{padding:10px 12px}
 .modal-note{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px}
+
+/* ===== v1.3.5: tło na iOS =====
+   position:fixed z inset:0 nie zawsze pokrywa dolny pas (przy zwijaniu paska
+   adresu odsłania się krawędź warstwy). Rozciągamy do 100lvh i promujemy
+   warstwę do własnej kompozycji, żeby nie było prześwitu przy przewijaniu. */
+.bg-scene{
+  min-height:100lvh;
+  background-color:var(--bg);
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
+}

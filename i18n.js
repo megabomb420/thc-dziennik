@@ -1,6 +1,6 @@
 /* ===== I18N: angielski (domyślny) + polski ===== */
 (() => {
-  const APP_VERSION = '1.3.4';   // jedno źródło dla UI (package.json musi zostać zgodny)
+  const APP_VERSION = '1.3.5';   // jedno źródło dla UI (package.json musi zostać zgodny)
 
   const STRINGS = {
     en: {

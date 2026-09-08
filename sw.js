@@ -1,4 +1,4 @@
-const CACHE = 'thc-dziennik-v14';
+const CACHE = 'thc-dziennik-v15';
 const ASSETS = ['./', './index.html', './style.css', './i18n.js', './icons.js', './app.js', './fx.js', './manifest.webmanifest', './fonts/chakra-400.woff2', './fonts/chakra-400ext.woff2', './fonts/chakra-600.woff2', './fonts/chakra-600ext.woff2', './fonts/chakra-700.woff2', './fonts/chakra-700ext.woff2',
   './icons/icon-192.png', './icons/icon-512.png'];
 

@@ -25,6 +25,13 @@ The app is meant to feel native rather than like a web page. Pinch zoom and doub
 
 Cards are animated from JS, never CSS, so a JS failure leaves the page readable. `fx.js` writes only the independent `translate`, `scale` and `opacity` properties; the pointer tilt keeps using `transform`, so the two never overwrite each other. The loop is rAF-driven with per-frame lerp smoothing, stops when settled, and restarts on scroll, resize, visibility change and any body resize.
 
+## Release 1.3.5 — completed scope (2026-09-08)
+
+- **Background coverage on iOS.** Reported from a physical iPhone 17 Pro: the background was cut off at the bottom. `.bg-scene` is `position: fixed; inset: 0`, and iOS Safari sizes fixed layers against the layout viewport, so with the address bar shown the layer can stop short of the visible bottom and reveal a hard edge — and because the layer is `overflow: hidden`, the orbs, stars and aurora are clipped exactly at that line. It now carries `min-height: 100lvh` (the tallest viewport) so it always over-covers, `transform: translateZ(0)` to give it its own compositing layer and avoid the repaint gap iOS shows while scrolling, and `background-color: var(--bg)` as a hard floor under the gradient. The canvas was deliberately left alone: it carries an inline size, and a `min-height` would stretch its bitmap.
+- Version metadata 1.3.5 and `sw.js` `CACHE` bumped `v14` → `v15`.
+
+Validation: `npm test` — 11/11. Layout probe at the iPhone 17 Pro viewport (402×874, DPR 3): the page still reaches the bottom, the footer is fully visible, nothing overflows horizontally. **Not verified on the device** — headless Chromium and WebKit do not reproduce iOS's dynamic viewport, so this fix is reasoned from the known behaviour of fixed layers on iOS and needs confirmation on the phone.
+
 ## Release 1.3.4 — completed scope (2026-09-08)
 
 - **Import.** Export without import was half a backup. The history header now carries Export and Import side by side. Import reads a JSON file through a hidden `<input type="file">`, parses it defensively, runs the same `sanitizeEntries`/`sanitizeSettings` used on load, then asks whether to Replace all (entries plus the file's goal and language) or Merge (append, skipping any entry whose id already exists). A malformed file or a JSON without an `entries` array shows an error toast and changes nothing. Escape, backdrop click and Cancel all close the dialog through the shared modal machinery.
