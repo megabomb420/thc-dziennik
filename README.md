@@ -12,7 +12,7 @@ Bez backendu, bez konta, bez zależności w runtime: statyczne pliki, a dane zos
 - Opcjonalna ilość (g/mg) i notatka (nastrój, powód)
 - Statystyki: sesje dziś, czas od ostatniej, średni odstęp, wykres 7 dni
 - Dzienny limit sesji z paskiem postępu (tryb redukcji)
-- Eksport danych do JSON
+- Eksport i import danych do/z pliku JSON (import: scalanie z deduplikacją albo zastąpienie)
 - Działa offline, instalowalna jako PWA, dane tylko lokalnie (localStorage)
 - Zachowuje się jak apka, nie strona: brak zoomu (pinch i double-tap), brak gumowania przy scrollu, karty płynnie wjeżdżają podczas przewijania
 - **Dwa języki:** angielski domyślnie, polski do wyboru w ustawieniach (przełącza się od razu, razem z datami i nazwami dni)

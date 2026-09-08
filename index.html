@@ -96,9 +96,15 @@
   <section class="card">
     <div class="hist-head">
       <h2 data-i18n="historyTitle">History</h2>
-      <button class="btn ghost small" id="exportBtn" data-icon="download"><span data-i18n="exportJson">Export JSON</span></button>
+      <div class="hist-actions">
+        <button class="btn ghost small" id="exportBtn" data-icon="download"
+          data-i18n-title="exportTitle" data-i18n-aria="exportTitle"><span data-i18n="exportJson">Export</span></button>
+        <button class="btn ghost small" id="importBtn" data-icon="upload"
+          data-i18n-title="importTitle" data-i18n-aria="importTitle"><span data-i18n="importJson">Import</span></button>
+      </div>
     </div>
     <div id="history" class="history"></div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
   </section>
 
   <footer data-i18n="footer">data stays on this device only · v1.3.3</footer>
@@ -142,6 +148,19 @@
       <button class="btn primary" id="confirmTime"><span data-i18n="save">Save</span></button>
       <button class="btn ghost" id="cancelTime"><span data-i18n="cancel">Cancel</span></button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORTU -->
+<div class="modal hidden" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importHeading">
+  <div class="modal-box" tabindex="-1">
+    <h2 class="with-ico" id="importHeading"><span data-icon="upload"></span><span data-i18n="importHeading">Import data</span></h2>
+    <p class="modal-note" data-i18n="importHint">Replace everything, or add the file to what is already here?</p>
+    <div class="modal-actions">
+      <button class="btn primary" id="importReplace"><span data-i18n="importReplace">Replace all</span></button>
+      <button class="btn ghost" id="importMerge"><span data-i18n="importMerge">Merge</span></button>
+    </div>
+    <button class="btn ghost small" id="importCancel" style="margin-top:10px;width:100%"><span data-i18n="cancel">Cancel</span></button>
   </div>
 </div>
 

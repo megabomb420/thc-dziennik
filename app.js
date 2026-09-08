@@ -13,13 +13,12 @@ function readJSON(key, fallback) {
   } catch { return fallback; }
 }
 
-function loadEntries() {
-  const raw = readJSON(LS_ENTRIES, []);
-  if (!Array.isArray(raw)) return [];
+function sanitizeEntries(raw) {
+  if (!Array.isArray(raw)) return null;
   return raw
     .filter(e => e && typeof e === 'object' && typeof e.t === 'number' && isFinite(e.t))
     .map(e => ({
-      id: typeof e.id === 'string' && e.id ? e.id : Math.random().toString(36).slice(2, 10),
+      id: typeof e.id === 'string' && e.id ? e.id.slice(0, 40) : Math.random().toString(36).slice(2, 10),
       t: e.t,
       m: typeof e.m === 'string' ? e.m : 'vapor',
       amount: e.amount == null ? null : String(e.amount).slice(0, 24),
@@ -27,8 +26,7 @@ function loadEntries() {
     }));
 }
 
-function loadSettings() {
-  const raw = readJSON(LS_SETTINGS, {});
+function sanitizeSettings(raw) {
   const s = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
   const goal = parseInt(s.goal, 10);
   return {
@@ -36,6 +34,9 @@ function loadSettings() {
     lang: s.lang === 'pl' ? 'pl' : 'en',
   };
 }
+
+const loadEntries = () => sanitizeEntries(readJSON(LS_ENTRIES, [])) || [];
+const loadSettings = () => sanitizeSettings(readJSON(LS_SETTINGS, {}));
 
 let entries = loadEntries();
 let settings = loadSettings();
@@ -95,7 +96,8 @@ document.addEventListener('keydown', e => {
   if (!activeModal) return;
   if (e.key === 'Escape') {
     e.preventDefault();
-    if (activeModal.id === 'settingsModal') closeSettings(); else closeTimeModal();
+    const close = { settingsModal: closeSettings, timeModal: closeTimeModal, importModal: closeImport }[activeModal.id];
+    if (close) close();
     return;
   }
   if (e.key !== 'Tab') return;
@@ -249,13 +251,68 @@ document.querySelectorAll('.quick-times .chip').forEach(chip => chip.onclick = (
   closeTimeModal();
 });
 
-/* --- eksport --- */
+/* --- eksport / import --- */
 $('exportBtn').onclick = () => {
   const blob = new Blob([JSON.stringify({ settings, entries }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'thc-journal-' + new Date().toISOString().slice(0, 10) + '.json';
   a.click();
+};
+
+let pendingImport = null;
+
+function closeImport() { pendingImport = null; closeModal($('importModal')); }
+
+$('importBtn').onclick = () => { $('importFile').value = ''; $('importFile').click(); };
+
+$('importFile').onchange = () => {
+  const file = $('importFile').files && $('importFile').files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try { data = JSON.parse(String(reader.result)); } catch { toast(t('importBad'), 'alert'); return; }
+    const incoming = data && typeof data === 'object' ? sanitizeEntries(data.entries) : null;
+    if (!incoming) { toast(t('importBad'), 'alert'); return; }
+    pendingImport = {
+      entries: incoming,
+      settings: data.settings && typeof data.settings === 'object' ? sanitizeSettings(data.settings) : { ...settings },
+    };
+    openModal($('importModal'));
+  };
+  reader.onerror = () => toast(t('importBad'), 'alert');
+  reader.readAsText(file);
+};
+
+$('importCancel').onclick = closeImport;
+$('importModal').addEventListener('click', e => { if (e.target === $('importModal')) closeImport(); });
+
+$('importReplace').onclick = () => {
+  if (!pendingImport) return;
+  entries = pendingImport.entries;
+  settings = pendingImport.settings;
+  save();
+  langAtOpen = settings.lang;
+  $('langInput').value = settings.lang;
+  $('goalInput').value = settings.goal;
+  const n = entries.length;
+  closeImport();
+  window.i18n.setLang(settings.lang);   // przerysowuje też listę i statystyki
+  toast(t('toastImported', { n }), 'upload');
+};
+
+$('importMerge').onclick = () => {
+  if (!pendingImport) return;
+  const have = new Set(entries.map(e => e.id));
+  const fresh = pendingImport.entries.filter(e => !have.has(e.id));
+  const skipped = pendingImport.entries.length - fresh.length;
+  entries = entries.concat(fresh);
+  save();
+  const n = fresh.length;
+  closeImport();
+  renderAll();
+  toast(skipped ? t('toastImportedDup', { n, d: skipped }) : t('toastImported', { n }), 'upload');
 };
 
 /* --- ustawienia --- */

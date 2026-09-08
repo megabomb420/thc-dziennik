@@ -353,3 +353,9 @@ footer{color:var(--muted)}
 /* karty: bez backdrop-filter (31 -> 60 fps w Chromium), tło bardziej kryjące */
 .card{backdrop-filter:none;-webkit-backdrop-filter:none;
   background:linear-gradient(160deg,rgba(17,32,24,.95),rgba(23,45,30,.93))}
+
+/* ===== v1.3.4: import danych ===== */
+.hist-head{flex-wrap:wrap;gap:8px}
+.hist-actions{display:flex;gap:8px;margin-left:auto}
+.hist-actions .btn{padding:10px 12px}
+.modal-note{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px}

@@ -1,6 +1,6 @@
 /* ===== I18N: angielski (domyślny) + polski ===== */
 (() => {
-  const APP_VERSION = '1.3.3';   // jedno źródło dla UI (package.json musi zostać zgodny)
+  const APP_VERSION = '1.3.4';   // jedno źródło dla UI (package.json musi zostać zgodny)
 
   const STRINGS = {
     en: {
@@ -26,7 +26,17 @@
       chartTitle: 'Last 7 days',
       chartAria: 'Bar chart, last 7 days: {d}',
       historyTitle: 'History',
-      exportJson: 'Export JSON',
+      exportJson: 'Export',
+      exportTitle: 'Export data to a JSON file',
+      importJson: 'Import',
+      importTitle: 'Import data from a JSON file',
+      importHeading: 'Import data',
+      importHint: 'Replace everything, or add the file to what is already here?',
+      importReplace: 'Replace all',
+      importMerge: 'Merge',
+      importBad: 'That file is not a valid journal export',
+      toastImported: 'Imported {n} entries',
+      toastImportedDup: 'Imported {n}, skipped {d} duplicates',
       empty: 'No entries yet — log your first session to start tracking your rhythm',
       footer: 'data stays on this device only · v{v}',
       settings: 'Settings',
@@ -81,7 +91,17 @@
       chartTitle: 'Ostatnie 7 dni',
       chartAria: 'Wykres słupkowy, ostatnie 7 dni: {d}',
       historyTitle: 'Historia',
-      exportJson: 'Eksport JSON',
+      exportJson: 'Eksport',
+      exportTitle: 'Eksportuj dane do pliku JSON',
+      importJson: 'Import',
+      importTitle: 'Importuj dane z pliku JSON',
+      importHeading: 'Import danych',
+      importHint: 'Zastąpić wszystko, czy dodać plik do tego, co już jest?',
+      importReplace: 'Zastąp wszystko',
+      importMerge: 'Scal',
+      importBad: 'Ten plik nie jest prawidłowym eksportem dziennika',
+      toastImported: 'Zaimportowano wpisy: {n}',
+      toastImportedDup: 'Zaimportowano: {n}, pominięto duplikaty: {d}',
       empty: 'Brak wpisów — zapisz pierwszą sesję, żeby zacząć śledzić swój rytm',
       footer: 'dane zapisują się lokalnie na tym urządzeniu · v{v}',
       settings: 'Ustawienia',

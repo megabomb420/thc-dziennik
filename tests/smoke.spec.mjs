@@ -106,3 +106,47 @@ test('działa offline (service worker + cache)', async ({ page, context }) => {
   await expect(page.locator('.method')).toHaveCount(6);
   await context.setOffline(false);
 });
+
+const backupFile = (entries, settings) => ({
+  name: 'backup.json',
+  mimeType: 'application/json',
+  buffer: Buffer.from(JSON.stringify({ settings, entries })),
+});
+
+test('import: scalanie z deduplikacją i zastąpienie', async ({ page }) => {
+  await seed(page, [{ id: 'keep', t: Date.now() - 3600000, m: 'dab', amount: null, note: null }]);
+  await page.goto('/');
+
+  await page.setInputFiles('#importFile', backupFile([
+    { id: 'keep', t: Date.now() - 7200000, m: 'vape', amount: null, note: null },
+    { id: 'new1', t: Date.now() - 10800000, m: 'edible', amount: null, note: null },
+    { id: 'new2', t: Date.now() - 14400000, m: 'oil', amount: null, note: null },
+  ], { goal: 2, lang: 'en' }));
+  await expect(page.locator('#importModal')).toBeVisible();
+  await page.click('#importMerge');
+  await expect(page.locator('.entry')).toHaveCount(3);
+  await expect(page.locator('.toast')).toContainText('skipped 1 duplicates');
+
+  await page.setInputFiles('#importFile', backupFile([
+    { id: 'only', t: Date.now(), m: 'smoke', amount: null, note: 'z pliku' },
+  ], { goal: 5, lang: 'pl' }));
+  await page.click('#importReplace');
+  await expect(page.locator('.entry')).toHaveCount(1);
+  await expect(page.locator('.entry .e-method')).toHaveText('Palenie');
+  await expect(page.locator('#statGoal')).toHaveText('5');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
+});
+
+test('import: nieprawidłowy plik nie psuje danych', async ({ page }) => {
+  await seed(page, [{ id: 'a', t: Date.now(), m: 'dab', amount: null, note: null }]);
+  await page.goto('/');
+
+  await page.setInputFiles('#importFile', { name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{nie json') });
+  await expect(page.locator('#importModal')).toBeHidden();
+  await expect(page.locator('.toast')).toContainText('not a valid');
+  await expect(page.locator('.entry')).toHaveCount(1);
+
+  await page.setInputFiles('#importFile', { name: 'wrong.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({ foo: 1 })) });
+  await expect(page.locator('.toast')).toContainText('not a valid');
+  await expect(page.locator('.entry')).toHaveCount(1);
+});

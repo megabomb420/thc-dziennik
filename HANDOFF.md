@@ -25,6 +25,14 @@ The app is meant to feel native rather than like a web page. Pinch zoom and doub
 
 Cards are animated from JS, never CSS, so a JS failure leaves the page readable. `fx.js` writes only the independent `translate`, `scale` and `opacity` properties; the pointer tilt keeps using `transform`, so the two never overwrite each other. The loop is rAF-driven with per-frame lerp smoothing, stops when settled, and restarts on scroll, resize, visibility change and any body resize.
 
+## Release 1.3.4 — completed scope (2026-09-08)
+
+- **Import.** Export without import was half a backup. The history header now carries Export and Import side by side. Import reads a JSON file through a hidden `<input type="file">`, parses it defensively, runs the same `sanitizeEntries`/`sanitizeSettings` used on load, then asks whether to Replace all (entries plus the file's goal and language) or Merge (append, skipping any entry whose id already exists). A malformed file or a JSON without an `entries` array shows an error toast and changes nothing. Escape, backdrop click and Cancel all close the dialog through the shared modal machinery.
+- **The deployed site no longer ships the repository.** Pages moved from the legacy branch build to a GitHub Actions deployment (`.github/workflows/pages.yml`) that copies only the app files into `_site` and uploads that. `tests/`, `scripts/`, `playwright.config.mjs`, `package.json` and the README are no longer served from the public site.
+- Version metadata 1.3.4 and `sw.js` `CACHE` bumped `v13` → `v14`.
+
+Validation: `npm test` — 11/11, including two new import tests (merge skips a colliding id and reports the count; replace swaps entries, goal and language; a malformed file and a JSON without `entries` both leave the journal untouched). Manual check at 390px: the header shows Export + Import at 44px with no horizontal overflow, and the import dialog renders Replace all / Merge / Cancel. After the Pages switch, the live site returns 404 for `tests/smoke.spec.mjs` while the app itself is unchanged.
+
 ## Release 1.3.3 — completed scope (2026-09-08)
 
 Finishing pass toward 10/10 — the gaps left open by 1.3.2, plus a bug the new tests found.
